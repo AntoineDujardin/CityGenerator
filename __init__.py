@@ -11,8 +11,10 @@ if "bpy" in locals():
     imp.reload(block)
     imp.reload(city)
     imp.reload(ground)
+    imp.reload(road)
 else:
-    from city_generator import block, city, ground
+    from city_generator import block, city, ground, road
+
 
 import bpy
 

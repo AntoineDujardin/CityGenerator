@@ -1,3 +1,12 @@
+# To support reload properly, try to access a package var, 
+# if it's there, reload everything
+if "Block" in locals():
+    import imp
+    imp.reload(road)
+else:
+    from city_generator import road
+
+
 import bpy
 import random
 
@@ -47,8 +56,7 @@ class Block:
         """Cleanly delete the object"""
         
         # erase the block if drawn
-        if self.is_drawn:
-            self.erase()
+        self.erase()
     
     
     def create(self, blocks):
@@ -67,8 +75,11 @@ class Block:
         Block(self.x_start, self.x_size, self.y_start, y_cut,
               self.decreased(y_road_size), self.min_block_size,
               self.max_block_size, blocks, roads, self.scene)
-        #self.roads.append(road.Road(x_start, x_size, y_start+y_cut,
-        #                        y_road_size))
+        roads.add(road.Road([
+            (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
+            (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
+             0)
+        ], self.scene))
         Block(self.x_start, self.x_size, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size,
               self.decreased(y_road_size), self.min_block_size,
@@ -84,8 +95,11 @@ class Block:
         Block(self.x_start, x_cut, self.y_start, self.y_size,
               self.decreased(x_road_size), self.min_block_size,
               self.max_block_size, blocks, roads, self.scene)
-        #mRoads.push(new Element(x_start+x_cut, x_road_size, y_start,
-        #                        y_size))
+        roads.add(road.Road([
+            (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
+            (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
+             0)
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, self.y_size,
               self.decreased(x_road_size), self.min_block_size,
@@ -106,23 +120,31 @@ class Block:
         Block(self.x_start, x_cut, self.y_start, y_cut, next_road_size,
               self.min_block_size, self.max_block_size, blocks, roads,
               self.scene)
-        #mRoads.push(new Element(x_start+x_cut, x_road_size, y_start,
-        #                        y_cut))
+        roads.add(road.Road([
+            (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
+            (self.x_start+x_cut+x_road_size/2, self.y_start+y_cut, 0)
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, y_cut,
               next_road_size, self.min_block_size,
               self.max_block_size, blocks, roads, self.scene)
         
-        #mRoads.push(new Element(x_start, x_size, y_start+y_cut,
-        #                        y_road_size))
+        roads.add(road.Road([
+            (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
+            (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
+             0)
+        ], self.scene))
         
         Block(self.x_start, x_cut, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size, next_road_size,
               self.min_block_size, self.max_block_size, blocks, roads,
               self.scene)
-        #mRoads.push(new Element(x_start+x_cut, x_road_size,
-        #                        y_start+y_cut+y_road_size,
-        #                        y_size-y_cut-y_road_size))
+        roads.add(road.Road([
+            (self.x_start+x_cut+x_road_size/2,
+             self.y_start+y_cut+y_road_size, 0),
+            (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
+             0)
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size,
               self.y_start+y_cut+y_road_size,
@@ -162,6 +184,10 @@ class Block:
     
     def erase(self):
         """Erase the drawn block."""
+        
+        # assert drawing
+        if not self.is_drawn:
+            return
         
         # unlink the block from the scene (if not done)
         if self.object in self.scene.objects.values():

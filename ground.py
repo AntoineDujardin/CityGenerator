@@ -7,8 +7,7 @@ class Ground:
     The ground is caracterized by its radius and by its altitude
     in function of x and y."""
     
-    
-    def __init__(self, radius=100, altitude_f=[], noise_amplitude=5,
+    def __init__(self, x_size, y_size, altitude_f=[], noise_amplitude=5,
                  number_cuts=10):
         """Create a new ground with its size and altitude.
         The altitude function is defined such that z = f(x, y, radius).
@@ -21,13 +20,16 @@ class Ground:
             bpy.ops.object.mode_set(mode='OBJECT')
         
         # create a plane
-        bpy.ops.mesh.primitive_plane_add(radius=radius,
-                                         location=(0,0,0))
+        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0,0,0))
         
         # recover infos
         self.scene = bpy.context.scene
         self.object = bpy.context.object
         self.mesh = self.object.data
+        
+        # scale it
+        self.object.scale[0] = x_size
+        self.object.scale[1] = y_size
         
         # subdivide it
         bpy.ops.object.mode_set(mode='EDIT')
@@ -36,12 +38,11 @@ class Ground:
         
         # define altitude_f if needed
         if altitude_f == []:
-            altitude_f = lambda x, y, radius: 0
+            altitude_f = lambda x, y: 0
         
         # change altitude
         for vertice in self.mesh.vertices:
-            vertice.co.z = (altitude_f(vertice.co.x, vertice.co.y,
-                                       radius)
+            vertice.co.z = (altitude_f(vertice.co.x, vertice.co.y)
                 + noise_amplitude * random.uniform(-1,1))
         
         # smooth it
@@ -73,7 +74,7 @@ class Ground:
     
     
     @staticmethod
-    def mound_altitude_f(altitude=20, sharpening=5):
+    def mound_altitude_f(altitude=20, sharpening=0.025):
         """Create a function giving an altitude that give a mound."""
-        return (lambda x, y, radius:
-            altitude*math.exp(-sharpening*(x**2+y**2)/radius**2))
+        return (lambda x, y:
+            altitude*math.exp(-sharpening*(x**2+y**2)))

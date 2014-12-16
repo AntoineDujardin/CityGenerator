@@ -21,14 +21,18 @@ class City:
         self.min_block_size = min_block_size
         self.max_block_size = max_block_size
         self.road_size = road_size
+        self.scene = scene
         
         # initialize
         self.blocks = set()
         self.roads = set()
         
-        # <create ground>
+        # create the ground
+        scene.layers = (True,) + 19*(False,)
+        self.ground = ground.Ground(city_x_size, city_y_size)
         
         # make the block decomposition
+        scene.layers = (False, True) + 18*(False,)
         block.Block(-self.city_x_size/2, self.city_x_size,
                     -self.city_y_size/2, self.city_y_size, road_size,
                     min_block_size, max_block_size, self.blocks,
