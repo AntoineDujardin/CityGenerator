@@ -27,6 +27,10 @@ class Ground:
         self.object = bpy.context.object
         self.mesh = self.object.data
         
+        # rename
+        self.object.name = "C_Ground"
+        self.mesh.name = "C_Ground"
+        
         # scale it
         self.object.scale[0] = x_size
         self.object.scale[1] = y_size

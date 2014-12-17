@@ -8,6 +8,8 @@ else:
     from city_generator import block, ground
 
 
+import bpy
+
 class City:
     """Class managing the creation of the whole city."""
     
@@ -42,6 +44,30 @@ class City:
     def __del__(self):
         """Cleanly delete the city"""
         
-        # <del ground>
+        # delete ground
+        del self.ground
         
-        # <del everything else>
+        # delete blocks
+        for block in self.blocks:
+            del block
+        
+        # delete roads
+        for road in self.roads:
+            del road
+        
+        # delect all
+        bpy.ops.object.select_all(action='DESELECT') 
+        
+        # unlink objects
+        for key, object in self.scene.objects.items():
+            self.scene.objects.unlink(object)
+        
+        # erase the objects
+        for key, object in bpy.data.objects.items():
+            if key.startswith("C_"):
+                del object
+        
+        # erase the meshes
+        for key, mesh in bpy.data.meshes.items():
+            if key.startswith("C_"):
+                del mesh
