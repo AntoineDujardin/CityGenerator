@@ -4,16 +4,25 @@ import random
 
 class Ground:
     """Class defining the ground.
-    The ground is caracterized by its radius and by its altitude
+    The ground is caracterized by its size and by its altitude
     in function of x and y."""
     
-    def __init__(self, x_size, y_size, altitude_f=[], noise_amplitude=5,
-                 number_cuts=10):
-        """Create a new ground with its size and altitude.
-        The altitude function is defined such that z = f(x, y, radius).
-        It is modified by a noise determined by noise_amplitude.
-        The parameter number_cuts is the one used in the subdivision
-        process."""
+    def __init__(self, x_size, y_size):
+        """Create a new ground with its size and altitude."""
+        
+        # save the values
+        self.x_size = x_size
+        self.y_size = y_size
+        
+        # define altitude_f
+        self.altitude_f = Ground.mound_altitude_f()
+        
+        # draw it
+        self.draw()
+    
+    
+    def draw(self):
+        """Draw the ground."""
         
         # leave EDIT mode if needed
         if bpy.context.object:
@@ -32,35 +41,48 @@ class Ground:
         self.mesh.name = "C_Ground"
         
         # scale it
-        self.object.scale[0] = x_size
-        self.object.scale[1] = y_size
+        self.object.scale[0] = self.x_size
+        self.object.scale[1] = self.y_size
+        bpy.ops.object.transform_apply(scale=True)
         
         # subdivide it
+        if (self.x_size >= 2 * self.y_size
+            or self.y_size >= 2 * self.x_size):
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.context.tool_settings.mesh_select_mode = [False, True,
+                                                          False]
+            bpy.ops.object.mode_set(mode='OBJECT')
+            for vert in self.mesh.vertices:
+                vert.select = True
+            if self.x_size > self.y_size:
+                self.mesh.edges[0].select = True
+                self.mesh.edges[1].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.x_size
+                                                       / self.y_size))
+            else:
+                self.mesh.edges[2].select = True
+                self.mesh.edges[3].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.y_size
+                                                       / self.x_size))
         bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.subdivide(number_cuts=number_cuts)
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.subdivide(number_cuts=int(min(self.x_size,
+                                                   self.y_size)))
         bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # define altitude_f if needed
-        if altitude_f == []:
-            altitude_f = lambda x, y: 0
         
         # change altitude
         for vertex in self.mesh.vertices:
-            vertex.co.z = (altitude_f(vertex.co.x, vertex.co.y)
-                + noise_amplitude * random.uniform(-1,1))
-        
-        # smooth it
-        bpy.ops.object.modifier_add(type='SUBSURF')
-        bpy.context.object.modifiers["Subsurf"].levels = 2
-        bpy.context.object.modifiers["Subsurf"].render_levels = 3
-        bpy.ops.object.modifier_apply(apply_as='DATA')
+            vertex.co.z = self.altitude_f(vertex.co.x, vertex.co.y)
         
         # update
         self.mesh.update()
 
     
     @staticmethod
-    def mound_altitude_f(altitude=20, sharpening=0.025):
+    def mound_altitude_f(altitude=5, sharpening=0.003):
         """Create a function giving an altitude that give a mound."""
         return (lambda x, y:
             altitude*math.exp(-sharpening*(x**2+y**2)))

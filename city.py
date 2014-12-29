@@ -38,6 +38,9 @@ class City:
         block.Block(-self.city_x_size/2, self.city_x_size,
                     -self.city_y_size/2, self.city_y_size, road_size,
                     self)
+                    
+        # back to first layer
+        scene.layers = (True,) + 19*(False,)
     
     
     def __del__(self):

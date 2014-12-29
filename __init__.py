@@ -89,7 +89,9 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
             city_instance = None
         
         # delect all
-        bpy.ops.object.select_all(action='DESELECT') 
+        if bpy.context.object:
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action='DESELECT') 
         
         # unlink objects
         for key, object in scene.objects.items():
