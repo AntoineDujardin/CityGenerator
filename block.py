@@ -11,15 +11,11 @@ import bpy
 import random
 
 class Block:
-    """Class managing the blocks.
-    A blender block is caracterized by its vertices,
-    that must be given in positive order."""
+    """Class managing the blocks."""
     
     def __init__(self, x_start, x_size, y_start, y_size, road_size,
                  city):
-        """Create a new block of building and subdivide it.
-        If end subdivision, put itself in the blocks set. Add roads in
-        the roads set."""
+        """Create a new block of building and subdivide it."""
         
         # save the values
         self.x_start = x_start
@@ -52,7 +48,7 @@ class Block:
         """Properly create the block."""
         
         self.city.blocks.add(self)
-        self.draw()
+        #self.draw()
     
     
     def cut_y_axis(self):
@@ -63,11 +59,8 @@ class Block:
             self.y_size-2*self.city.min_block_size-y_road_size)
         Block(self.x_start, self.x_size, self.y_start, y_cut,
               self.decreased(y_road_size), self.city)
-        self.city.roads.add(road.Road([
-            (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
-            (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
-             0)
-        ], self.city.scene))
+        road.Road(self.x_start, self.x_size, self.y_start+y_cut,
+                  y_road_size, 0, self.city)
         Block(self.x_start, self.x_size, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size,
               self.decreased(y_road_size), self.city)
@@ -81,11 +74,8 @@ class Block:
             self.x_size-2*self.city.min_block_size-x_road_size)
         Block(self.x_start, x_cut, self.y_start, self.y_size,
               self.decreased(x_road_size), self.city)
-        self.city.roads.add(road.Road([
-            (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
-            (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
-             0)
-        ], self.city.scene))
+        road.Road(self.x_start+x_cut, x_road_size, self.y_start,
+                  self.y_size, 1, self.city)
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, self.y_size,
               self.decreased(x_road_size), self.city)
@@ -104,30 +94,22 @@ class Block:
         
         Block(self.x_start, x_cut, self.y_start, y_cut, next_road_size,
               self.city)
-        self.city.roads.add(road.Road([
-            (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
-            (self.x_start+x_cut+x_road_size/2, self.y_start+y_cut, 0)
-        ], self.city.scene))
+        road.Road(self.x_start+x_cut, x_road_size, self.y_start,
+                  y_cut, 1, self.city)
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, y_cut,
               next_road_size,
               self.city)
         
-        self.city.roads.add(road.Road([
-            (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
-            (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
-             0)
-        ], self.city.scene))
+        road.Road(self.x_start, self.x_size, self.y_start+y_cut,
+                  y_road_size, 0, self.city)
         
         Block(self.x_start, x_cut, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size, next_road_size,
               self.city)
-        self.city.roads.add(road.Road([
-            (self.x_start+x_cut+x_road_size/2,
-             self.y_start+y_cut+y_road_size, 0),
-            (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
-             0)
-        ], self.city.scene))
+        road.Road(self.x_start+x_cut, x_road_size,
+                  self.y_start+y_cut+y_road_size,
+                  self.y_size-y_cut-y_road_size, 1, self.city)
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size,
               self.y_start+y_cut+y_road_size,
@@ -136,29 +118,70 @@ class Block:
     
     
     def draw(self):
-        """Draw the block in blender."""
+        """Draw the block."""
         
-        # define the vertices
-        vertices = [
-            (self.x_start, self.y_start, 0),
-            (self.x_start+self.x_size, self.y_start, 0),
-            (self.x_start+self.x_size, self.y_start+self.y_size, 0),
-            (self.x_start, self.y_start+self.y_size, 0)
-        ]
+        # leave EDIT mode if needed
+        if bpy.context.object:
+            bpy.ops.object.mode_set(mode='OBJECT')
         
-        # define the face
-        faces = [range(len(vertices))]
+        # create a plane
+        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0, 0, 0))
         
-        # create the mesh
-        self.mesh = bpy.data.meshes.new("C_Block")
-        self.mesh.from_pydata(vertices, [], faces)
+        # recover infos
+        self.scene = bpy.context.scene
+        self.object = bpy.context.object
+        self.mesh = self.object.data
+        
+        # rename
+        self.object.name = "C_Block.000"
+        self.mesh.name = "C_Block.000"
+        
+        # scale it
+        self.object.scale[0] = self.x_size
+        self.object.scale[1] = self.y_size
+        bpy.ops.object.transform_apply(scale=True)
+        
+        # locate it
+        self.object.location[0] = self.x_start + self.x_size / 2
+        self.object.location[1] = self.y_start + self.y_size / 2
+        bpy.ops.object.transform_apply(location=True)
+        
+        # subdivide it
+        if (self.x_size >= 2 * self.y_size
+            or self.y_size >= 2 * self.x_size):
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.context.tool_settings.mesh_select_mode = [False, True,
+                                                          False]
+            bpy.ops.object.mode_set(mode='OBJECT')
+            for vert in self.mesh.vertices:
+                vert.select = True
+            if self.x_size > self.y_size:
+                self.mesh.edges[0].select = True
+                self.mesh.edges[1].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.x_size
+                                                       / self.y_size))
+            else:
+                self.mesh.edges[2].select = True
+                self.mesh.edges[3].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.y_size
+                                                       / self.x_size))
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.subdivide(number_cuts=int(min(self.x_size,
+                                                   self.y_size)))
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # change altitude
+        altitude_f = self.city.ground.altitude_f
+        for vertex in self.mesh.vertices:
+            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
+        
+        # update
         self.mesh.update()
-        
-        # create the block as an object
-        self.object = bpy.data.objects.new("C_Block", self.mesh)
-        
-        # link the block to the scene
-        self.city.scene.objects.link(self.object)
+
     
     
     def corrected_road_size(self, block_size):

@@ -1,39 +1,90 @@
 import bpy
 
 class Road:
-    """Class managing the roads. Roads are represented by their central
-    line as a curve and their size."""
+    """Class managing the roads."""
+
     
-    def __init__(self, vertices, scene):
-        """Create a roads whose centrale line is defined by the list of
-        vertices that is given."""
+    def __init__(self, x_start, x_size, y_start, y_size, orientation,
+                 city):
+        """Create a new road with the given coordinates.
+        Orientation is 0 (1) for a road parallel to the x-axis (y)."""
         
         # save the values
-        self.vertices = vertices
-        self.scene = scene
+        self.x_start = x_start
+        self.x_size = x_size
+        self.y_start = y_start
+        self.y_size = y_size
+        self.orientation = orientation
+        self.city = city
         
-        # draw
+        # add itself to the city roads
+        self.city.roads.add(self)
+        
+        # draw itself
         self.draw()
-    
+
     
     def draw(self):
-        """Drawn the central line curve."""
+        """Draw the road."""
         
-        # define the edges
-        edges = [(i, i+1) for i in range(0,len(self.vertices)-1)]
+        # leave EDIT mode if needed
+        if bpy.context.object:
+            bpy.ops.object.mode_set(mode='OBJECT')
         
-        # create the mesh
-        self.mesh = bpy.data.meshes.new("C_Road")
-        self.mesh.from_pydata(self.vertices, edges, [])
+        # create a plane
+        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0, 0, 0))
+        
+        # recover infos
+        self.scene = bpy.context.scene
+        self.object = bpy.context.object
+        self.mesh = self.object.data
+        
+        # rename
+        self.object.name = "C_Road.000"
+        self.mesh.name = "C_Road.000"
+        
+        # scale it
+        self.object.scale[0] = self.x_size
+        self.object.scale[1] = self.y_size
+        bpy.ops.object.transform_apply(scale=True)
+        
+        # locate it
+        self.object.location[0] = self.x_start + self.x_size / 2
+        self.object.location[1] = self.y_start + self.y_size / 2
+        bpy.ops.object.transform_apply(location=True)
+        
+        # subdivide it
+        if (self.x_size >= 2 * self.y_size
+            or self.y_size >= 2 * self.x_size):
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.context.tool_settings.mesh_select_mode = [False, True,
+                                                          False]
+            bpy.ops.object.mode_set(mode='OBJECT')
+            for vert in self.mesh.vertices:
+                vert.select = True
+            if self.x_size > self.y_size:
+                self.mesh.edges[0].select = True
+                self.mesh.edges[1].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.x_size
+                                                       / self.y_size))
+            else:
+                self.mesh.edges[2].select = True
+                self.mesh.edges[3].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(number_cuts=int(self.y_size
+                                                       / self.x_size))
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.subdivide(number_cuts=int(min(self.x_size,
+                                                   self.y_size)))
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # change altitude
+        altitude_f = self.city.ground.altitude_f
+        for vertex in self.mesh.vertices:
+            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
+        
+        # update
         self.mesh.update()
-        
-        # create the road as an object
-        self.object = bpy.data.objects.new("C_Road", self.mesh)
-        
-        # link the block to the scene
-        self.scene.objects.link(self.object)
-        
-        # transform into curve
-        self.object.select = True
-        self.scene.objects.active = self.object
-        bpy.ops.object.convert(target='CURVE')

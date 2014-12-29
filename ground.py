@@ -18,7 +18,7 @@ class Ground:
         self.altitude_f = Ground.mound_altitude_f()
         
         # draw it
-        self.draw()
+        #self.draw()
     
     
     def draw(self):
