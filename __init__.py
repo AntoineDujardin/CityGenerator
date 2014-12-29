@@ -94,7 +94,8 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
         
         # unlink objects
         for key, object in scene.objects.items():
-            scene.objects.unlink(object)
+            if key.startswith("C_"):
+                scene.objects.unlink(object)
         
         # erase the objects
         for key, object in bpy.data.objects.items():
