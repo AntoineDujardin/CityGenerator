@@ -83,9 +83,29 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
         global city_instance
         scene = context.scene
         
+        # delete city and python objects
         if city_instance != None:
             del city_instance
             city_instance = None
+        
+        # delect all
+        bpy.ops.object.select_all(action='DESELECT') 
+        
+        # unlink objects
+        for key, object in scene.objects.items():
+            scene.objects.unlink(object)
+        
+        # erase the objects
+        for key, object in bpy.data.objects.items():
+            if key.startswith("C_"):
+                bpy.data.objects.remove(object)
+                del object
+        
+        # erase the meshes
+        for key, mesh in bpy.data.meshes.items():
+            if key.startswith("C_"):
+                bpy.data.meshes.remove(mesh)
+                del mesh
     
         return {'FINISHED'}
 

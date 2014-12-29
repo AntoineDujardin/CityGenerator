@@ -45,8 +45,8 @@ class Ground:
             altitude_f = lambda x, y: 0
         
         # change altitude
-        for vertice in self.mesh.vertices:
-            vertice.co.z = (altitude_f(vertice.co.x, vertice.co.y)
+        for vertex in self.mesh.vertices:
+            vertex.co.z = (altitude_f(vertex.co.x, vertex.co.y)
                 + noise_amplitude * random.uniform(-1,1))
         
         # smooth it
@@ -57,25 +57,7 @@ class Ground:
         
         # update
         self.mesh.update()
-    
-    
-    def __del__(self):
-        """Cleanly delete the object"""
-        
-        # unlink the ground from the scene (if not done)
-        if self.object in self.scene.objects.values():
-            if self.object.select: # object mode needed
-                bpy.ops.object.mode_set(mode='OBJECT')
-            self.scene.objects.unlink(self.object)
-        
-        # destroy the ground (if not done)
-        if self.object in bpy.data.objects.values():
-            bpy.data.objects.remove(self.object)
-        
-        # destroy the mesh (if not done)
-        if self.mesh in bpy.data.meshes.values():
-            bpy.data.meshes.remove(self.mesh)
-    
+
     
     @staticmethod
     def mound_altitude_f(altitude=20, sharpening=0.025):

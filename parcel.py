@@ -1,138 +1,149 @@
 # To support reload properly, try to access a package var, 
 # if it's there, reload everything
-if "Block" in locals():
-    import imp
-    imp.reload(road)
-else:
-    from city_generator import road
+#if "Parcel" in locals():
+    #import imp
+    #imp.reload(road)
+#else:
+    #from city_generator import road
 
 
 import bpy
 import random
 
-class Block:
-    """Class managing the blocks.
-    A blender block is caracterized by its vertices,
+class Parcel:
+    """Class managing the parcels.
+    A blender parcel is caracterized by its vertices,
     that must be given in positive order."""
     
-    def __init__(self, x_start, x_size, y_start, y_size, road_size,
-                 city):
-        """Create a new block of building and subdivide it.
-        If end subdivision, put itself in the blocks set. Add roads in
-        the roads set."""
+    def __init__(self, x_start, x_size, y_start, y_size,
+                 min_building_size, buildings, roads, scene):
+        """Create a new parcel and subdivide it.
+        If end subdivision, put itself in the parcels set. Add roads
+        in the roads set."""
         
         # save the values
         self.x_start = x_start
         self.x_size = x_size
         self.y_start = y_start
         self.y_size = y_size
-        self.road_size = road_size
-        self.city = city
+        self.min_building_size
+        self.scene = scene
         
         # subdivide
-        if (x_size <= city.max_block_size
-            and y_size <= city.max_block_size):
-            # block should not be cutted further, create it
-            self.create()
+        if (random.uniform(0, 1) >= 0.5):
+            # create it (big)
+            self.create(buildings)
         
-        elif (x_size <= city.max_block_size):
+        if (x_size >= 2*min_building_size and
+            y_size >= 2*min_building_size):
+            # double cut
+            self.double_cut(blocks, roads)
+        
+        elif (x_size >= 2*min_building_size):
             # y cut
-            self.cut_y_axis()
+            self.cut_y_axis(blocks, roads)
         
-        elif (y_size <= city.max_block_size):
+        elif (y_size >= 2*min_building_size):
             # x cut
-            self.cut_x_axis()
+            self.cut_x_axis(blocks, roads)
         
         else:
-            # double cut
-            self.double_cut()
+            # create it
+            self.create(blocks)
     
     
-    def create(self):
+    def create(self, blocks):
         """Properly create the block."""
         
-        self.city.blocks.add(self)
+        blocks.add(self)
         self.draw()
     
     
-    def cut_y_axis(self):
+    def cut_y_axis(self, blocks, roads):
         """Cut in y."""
         
         y_road_size = self.corrected_road_size(self.y_size)
-        y_cut = random.uniform(self.city.min_block_size,
-            self.y_size-2*self.city.min_block_size-y_road_size)
+        y_cut = random.uniform(self.min_block_size,
+            self.y_size-2*self.min_block_size-y_road_size)
         Block(self.x_start, self.x_size, self.y_start, y_cut,
-              self.decreased(y_road_size), self.city)
-        self.city.roads.add(road.Road([
+              self.decreased(y_road_size), self.min_block_size,
+              self.max_block_size, blocks, roads, self.scene)
+        roads.add(road.Road([
             (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
             (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
              0)
-        ], self.city.scene))
+        ], self.scene))
         Block(self.x_start, self.x_size, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size,
-              self.decreased(y_road_size), self.city)
+              self.decreased(y_road_size), self.min_block_size,
+              self.max_block_size, blocks, roads, self.scene)
     
     
-    def cut_x_axis(self):
+    def cut_x_axis(self, blocks, roads):
         """Cut in x."""
         
         x_road_size = self.corrected_road_size(self.x_size)
-        x_cut = random.uniform(self.city.min_block_size,
-            self.x_size-2*self.city.min_block_size-x_road_size)
+        x_cut = random.uniform(self.min_block_size,
+            self.x_size-2*self.min_block_size-x_road_size)
         Block(self.x_start, x_cut, self.y_start, self.y_size,
-              self.decreased(x_road_size), self.city)
-        self.city.roads.add(road.Road([
+              self.decreased(x_road_size), self.min_block_size,
+              self.max_block_size, blocks, roads, self.scene)
+        roads.add(road.Road([
             (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
             (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
              0)
-        ], self.city.scene))
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, self.y_size,
-              self.decreased(x_road_size), self.city)
+              self.decreased(x_road_size), self.min_block_size,
+              self.max_block_size, blocks, roads, self.scene)
     
     
-    def double_cut(self):
+    def double_cut(self, blocks, roads):
         """Cut in x and y."""
         
         x_road_size = self.corrected_road_size(self.x_size)
         y_road_size = self.corrected_road_size(self.y_size)
         next_road_size = self.decreased(min(x_road_size, y_road_size))
-        x_cut = random.uniform(self.city.min_block_size,
-            self.x_size-2*self.city.min_block_size-x_road_size)
-        y_cut = random.uniform(self.city.min_block_size,
-            self.y_size-2*self.city.min_block_size-y_road_size)
+        x_cut = random.uniform(self.min_block_size,
+            self.x_size-2*self.min_block_size-x_road_size)
+        y_cut = random.uniform(self.min_block_size,
+            self.y_size-2*self.min_block_size-y_road_size)
         
         Block(self.x_start, x_cut, self.y_start, y_cut, next_road_size,
-              self.city)
-        self.city.roads.add(road.Road([
+              self.min_block_size, self.max_block_size, blocks, roads,
+              self.scene)
+        roads.add(road.Road([
             (self.x_start+x_cut+x_road_size/2, self.y_start, 0),
             (self.x_start+x_cut+x_road_size/2, self.y_start+y_cut, 0)
-        ], self.city.scene))
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size, self.y_start, y_cut,
-              next_road_size,
-              self.city)
+              next_road_size, self.min_block_size,
+              self.max_block_size, blocks, roads, self.scene)
         
-        self.city.roads.add(road.Road([
+        roads.add(road.Road([
             (self.x_start, self.y_start+y_cut+y_road_size/2, 0),
             (self.x_start+self.x_size, self.y_start+y_cut+y_road_size/2,
              0)
-        ], self.city.scene))
+        ], self.scene))
         
         Block(self.x_start, x_cut, self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size, next_road_size,
-              self.city)
-        self.city.roads.add(road.Road([
+              self.min_block_size, self.max_block_size, blocks, roads,
+              self.scene)
+        roads.add(road.Road([
             (self.x_start+x_cut+x_road_size/2,
              self.y_start+y_cut+y_road_size, 0),
             (self.x_start+x_cut+x_road_size/2, self.y_start+self.y_size,
              0)
-        ], self.city.scene))
+        ], self.scene))
         Block(self.x_start+x_cut+x_road_size,
               self.x_size-x_cut-x_road_size,
               self.y_start+y_cut+y_road_size,
               self.y_size-y_cut-y_road_size, next_road_size,
-              self.city)
+              self.min_block_size, self.max_block_size, blocks, roads,
+              self.scene)
     
     
     def draw(self):
@@ -158,15 +169,14 @@ class Block:
         self.object = bpy.data.objects.new("C_Block", self.mesh)
         
         # link the block to the scene
-        self.city.scene.objects.link(self.object)
+        self.scene.objects.link(self.object)
     
     
     def corrected_road_size(self, block_size):
         """Return the road_size after correction with regard to the
         block_size : if the road is too big, decrease it."""
         
-        return min(self.road_size,
-                   block_size-2*self.city.min_block_size)
+        return min(self.road_size, block_size-2*self.min_block_size)
     
     
     def decreased(self, size):

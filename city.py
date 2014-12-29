@@ -37,8 +37,7 @@ class City:
         scene.layers = (False, True) + 18*(False,)
         block.Block(-self.city_x_size/2, self.city_x_size,
                     -self.city_y_size/2, self.city_y_size, road_size,
-                    min_block_size, max_block_size, self.blocks,
-                    self.roads, scene)
+                    self)
     
     
     def __del__(self):
@@ -54,20 +53,3 @@ class City:
         # delete roads
         for road in self.roads:
             del road
-        
-        # delect all
-        bpy.ops.object.select_all(action='DESELECT') 
-        
-        # unlink objects
-        for key, object in self.scene.objects.items():
-            self.scene.objects.unlink(object)
-        
-        # erase the objects
-        for key, object in bpy.data.objects.items():
-            if key.startswith("C_"):
-                del object
-        
-        # erase the meshes
-        for key, mesh in bpy.data.meshes.items():
-            if key.startswith("C_"):
-                del mesh
