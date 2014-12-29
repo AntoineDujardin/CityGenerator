@@ -58,8 +58,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         
         if (scene.city_x_size < scene.min_block_size or
             scene.city_y_size < scene.min_block_size or
-            scene.max_block_size < (2*scene.min_block_size +
-                                    scene.road_size)):
+            scene.max_block_size < (2*scene.min_block_size + 1)):
             return {'CANCELLED'}
         
         # Remove previous city (if any)
