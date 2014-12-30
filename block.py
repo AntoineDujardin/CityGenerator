@@ -2,9 +2,11 @@
 # if it's there, reload everything
 if "Block" in locals():
     import imp
+    imp.reload(const)
+    imp.reload(crossroads)
     imp.reload(road)
 else:
-    from city_generator import road
+    from city_generator import const, crossroads, road
 
 
 import bpy
@@ -101,7 +103,13 @@ class Block:
               next_road_size,
               self.city)
         
-        road.Road(self.x_start, self.x_size, self.y_start+y_cut,
+        road.Road(self.x_start, x_cut, self.y_start+y_cut,
+                  y_road_size, 0, self.city)
+        crossroads.Crossroads(self.x_start+x_cut, x_road_size,
+                              self.y_start+y_cut, y_road_size,
+                              self.city)
+        road.Road(self.x_start+x_cut+x_road_size,
+                  self.x_size-x_cut-x_road_size, self.y_start+y_cut,
                   y_road_size, 0, self.city)
         
         Block(self.x_start, x_cut, self.y_start+y_cut+y_road_size,
@@ -195,7 +203,7 @@ class Block:
     def decreased(self, size):
         """Return a decreased size, for the roads (size >= 1)."""
         
-        return (size+1)/2
+        return (size + const.min_road_size)/2
     
 
 # test

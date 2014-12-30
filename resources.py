@@ -1,10 +1,12 @@
 import bpy
 import os
 
-def load_all():
+def load_all(scene):
     """Load all the needed resources."""
-    load_texture("vert_road_text")
-    load_texture("hor_road_text")
+    load_texture("vert_road")
+    load_texture("hor_road")
+    load_texture("crossroads")
+    load_object("traffic_lights", scene)
 
 
 def load_texture(oname):
@@ -13,6 +15,15 @@ def load_texture(oname):
     # load texture iff not already existant
     if oname not in bpy.data.textures.keys():
         load("Texture", oname)
+
+
+def load_object(oname, scene):
+    """Append an object."""
+    
+    # load object iff not already existant
+    if oname not in bpy.data.objects.keys():
+        load("Object", oname)
+        bpy.context.scene.objects.unlink(bpy.data.objects[oname])
 
 
 def load(ofolder, oname):
@@ -24,11 +35,13 @@ def load(ofolder, oname):
     s = os.sep
     opath = "//resources.blend\\{}\\{}".format(ofolder, oname)
     dpath = bpy.utils.script_paths()[1] + \
-        "{0}addons{0}city_generator{0}resources{0}resources.blend\\{1}\\".format(s, ofolder)
+        ("{0}addons{0}city_generator{0}resources{0}resources.blend" + 
+        "\\{1}\\").format(s, ofolder)
     
     bpy.ops.wm.link_append(filepath=opath,
                            filename=oname,
                            directory=dpath,
                            filemode=1,
                            link=False,
-                           relative_path=True)
+                           relative_path=True,
+                           active_layer=True)

@@ -8,13 +8,11 @@ bl_info = {
 # if it's there, reload everything
 if "bpy" in locals():
     import imp
-    imp.reload(block)
     imp.reload(city)
-    imp.reload(ground)
+    imp.reload(const)
     imp.reload(resources)
-    imp.reload(road)
 else:
-    from city_generator import block, city, ground, resources, road
+    from city_generator import city, const, resources
 
 
 import bpy
@@ -59,14 +57,15 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         
         if (scene.city_x_size < scene.min_block_size or
             scene.city_y_size < scene.min_block_size or
-            scene.max_block_size < (2*scene.min_block_size + 1)):
+            scene.max_block_size < (2*scene.min_block_size +
+                                    const.min_road_size)):
             return {'CANCELLED'}
         
         # Remove previous city (if any)
         bpy.ops.city.delete()
         
         # Load the resources
-        resources.load_all()
+        resources.load_all(scene)
         
         # set the environment
         bpy.data.worlds["World"].light_settings.use_environment_light \
@@ -125,19 +124,20 @@ def register():
     bpy.utils.register_module(__name__)
     
     bpy.types.Scene.city_x_size = \
-        bpy.props.FloatProperty(name="X size", default=75.0, min=1.0,
+        bpy.props.FloatProperty(name="X size", default=30.0, min=1.0,
                                 max=200.0)
     bpy.types.Scene.city_y_size = \
-        bpy.props.FloatProperty(name="Y size", default=75.0, min=1.0,
+        bpy.props.FloatProperty(name="Y size", default=30.0, min=1.0,
                                 max=200.0)
     bpy.types.Scene.min_block_size = \
         bpy.props.FloatProperty(name="Min block size", default=3.0,
                                 min=1.0, max=10.0)
     bpy.types.Scene.max_block_size = \
-        bpy.props.FloatProperty(name="Max block size", default=8.0,
-                                min=3.0, max=21.0)
+        bpy.props.FloatProperty(name="Max block size", default=7.0,
+                                min=3.0, max=30.0)
     bpy.types.Scene.road_size = \
-        bpy.props.FloatProperty(name="Road size", default=2.0, min=1.0,
+        bpy.props.FloatProperty(name="Road size", default=2.0,
+                                min=const.min_road_size,
                                 max=5.0)
 
 

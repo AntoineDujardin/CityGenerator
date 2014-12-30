@@ -1,20 +1,27 @@
-import bpy
+# To support reload properly, try to access a package var, 
+# if it's there, reload everything
+if "Crossroads" in locals():
+    import imp
+    imp.reload(const)
+else:
+    from city_generator import const
 
-class Road:
-    """Class managing the roads."""
+
+import bpy
+from math import pi
+
+class Crossroads:
+    """Class managing the crossroads."""
 
     
-    def __init__(self, x_start, x_size, y_start, y_size, orientation,
-                 city):
-        """Create a new road with the given coordinates.
-        Orientation is 0 (1) for a road parallel to the x-axis (y)."""
+    def __init__(self, x_start, x_size, y_start, y_size, city):
+        """Create a new crossroad with the given coordinates."""
         
         # save the values
         self.x_start = x_start
         self.x_size = x_size
         self.y_start = y_start
         self.y_size = y_size
-        self.orientation = orientation
         self.city = city
         
         # add itself to the city roads
@@ -22,6 +29,39 @@ class Road:
         
         # draw itself
         self.draw()
+        
+        # add details
+        self.add_details()
+
+
+    def add_details(self):
+        """Add some details, like the traffic lights."""
+        
+        offset = const.pavement_size / 2
+        self.add_traffic_lights(self.x_start - offset,
+                                self.y_start - offset,
+                                -pi/2)
+        self.add_traffic_lights(self.x_start + self.x_size + offset,
+                                self.y_start - offset,
+                                0)
+        self.add_traffic_lights(self.x_start + self.x_size + offset,
+                                self.y_start + self.y_size + offset,
+                                pi/2)
+        self.add_traffic_lights(self.x_start - offset,
+                                self.y_start + self.y_size + offset,
+                                pi)
+    
+    
+    def add_traffic_lights(self, x, y, angle):
+        """Add some traffic_lights at the given coordinates.
+        The (z-)angle should be in radians."""
+        
+        traffic_lights = bpy.data.objects["traffic_lights"].copy()
+        traffic_lights.name = "C_Traffic_lights.000"
+        traffic_lights.location = (x, y,
+            self.city.ground.altitude_f(x, y))
+        traffic_lights.rotation_euler = (0, 0, angle)
+        self.city.scene.objects.link(traffic_lights)
 
     
     def draw(self):
@@ -40,8 +80,8 @@ class Road:
         self.mesh = self.object.data
         
         # rename
-        self.object.name = "C_Road.000"
-        self.mesh.name = "C_Road.000"
+        self.object.name = "C_Crossroads.000"
+        self.mesh.name = "C_Crossroads.000"
         
         # scale it
         self.object.scale[0] = self.x_size
@@ -87,17 +127,12 @@ class Road:
             vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
 
         # add the material
-        self.material = bpy.data.materials.new("C_Road.000")
+        self.material = bpy.data.materials.new("C_Crossroads.000")
         self.mesh.materials.append(self.material)
 
         # add the texture
         m_tex = self.material.texture_slots.add()
-        if self.orientation:
-            m_tex.texture = bpy.data.textures["vert_road"].copy()
-            m_tex.texture.repeat_y = round(self.y_size)
-        else:
-            m_tex.texture = bpy.data.textures["hor_road"].copy()
-            m_tex.texture.repeat_x = round(self.x_size)
+        m_tex.texture = bpy.data.textures["crossroads"].copy()
         
         # update
         self.mesh.update()
