@@ -2,8 +2,18 @@ import bpy
 import os
 
 def load_all():
-    load("Texture", "vert_road_text")
-    load("Texture", "hor_road_text")
+    """Load all the needed resources."""
+    load_texture("vert_road_text")
+    load_texture("hor_road_text")
+
+
+def load_texture(oname):
+    """Append a texture."""
+    
+    # load texture iff not already existant
+    if oname not in bpy.data.textures.keys():
+        load("Texture", oname)
+
 
 def load(ofolder, oname):
     """Append an element based on a resource in blender ;

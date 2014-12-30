@@ -85,9 +85,6 @@ class Road:
         altitude_f = self.city.ground.altitude_f
         for vertex in self.mesh.vertices:
             vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
-        
-        #bpy.context.scene.objects.active = obj
-        #obj.select = True
 
         # add the material
         self.material = bpy.data.materials.new("Mat")
