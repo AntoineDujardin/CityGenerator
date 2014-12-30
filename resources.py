@@ -6,6 +6,8 @@ def load_all(scene):
     load_texture("vert_road")
     load_texture("hor_road")
     load_texture("crossroads")
+    load_texture("pavement_regular")
+    load_texture("pavement_nrm")
     load_object("traffic_lights", scene)
 
 

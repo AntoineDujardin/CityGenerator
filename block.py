@@ -50,7 +50,7 @@ class Block:
         """Properly create the block."""
         
         self.city.blocks.add(self)
-        #self.draw()
+        self.draw()
     
     
     def cut_y_axis(self):
@@ -185,11 +185,56 @@ class Block:
         # change altitude
         altitude_f = self.city.ground.altitude_f
         for vertex in self.mesh.vertices:
-            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
+            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y) + \
+                const.pavement_thickness
+        
+        # extrude
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.extrude_region_move( \
+            MESH_OT_extrude_region={"mirror":False},
+            TRANSFORM_OT_translate={
+                "value":(0, 0, -const.planes_thickness),
+                "constraint_axis":(False, False, True),
+                "constraint_orientation":'NORMAL',
+                "mirror":False,
+                "proportional":'DISABLED',
+                "proportional_edit_falloff":'SMOOTH',
+                "proportional_size":1,
+                "snap":False,
+                "snap_target":'CLOSEST',
+                "snap_point":(0, 0, 0),
+                "snap_align":False,
+                "snap_normal":(0, 0, 0),
+                "texture_space":False,
+                "remove_on_cancel":False,
+                "release_confirm":False
+            })
+        bpy.ops.mesh.dissolve_limited()
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # add the material
+        self.material = bpy.data.materials.new("C_Pavement.000")
+        self.mesh.materials.append(self.material)
+        self.material.diffuse_color = (0.2, 0.2, 0.2)
+
+        # add the regular texture
+        m_tex = self.material.texture_slots.add()
+        m_tex.texture = bpy.data.textures["pavement_regular"].copy()
+        m_tex.texture.repeat_x = round(10*self.x_size)
+        m_tex.texture.repeat_y = round(10*self.y_size)
+        
+        # add the normal displacement texture
+        m_tex = self.material.texture_slots.add()
+        m_tex.texture = bpy.data.textures["pavement_nrm"].copy()
+        m_tex.texture.repeat_x = round(10*self.x_size)
+        m_tex.texture.repeat_y = round(10*self.y_size)
+        m_tex.use_map_color_diffuse = False
+        m_tex.use_map_normal = True
+        m_tex.normal_factor = 5
         
         # update
         self.mesh.update()
-
     
     
     def corrected_road_size(self, block_size):

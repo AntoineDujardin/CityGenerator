@@ -1,9 +1,17 @@
+# To support reload properly, try to access a package var, 
+# if it's there, reload everything
+if "Block" in locals():
+    import imp
+    imp.reload(const)
+else:
+    from city_generator import const
+
+
 import bpy
 
 class Road:
     """Class managing the roads."""
 
-    
     def __init__(self, x_start, x_size, y_start, y_size, orientation,
                  city):
         """Create a new road with the given coordinates.
@@ -86,9 +94,35 @@ class Road:
         for vertex in self.mesh.vertices:
             vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
 
+        # extrude
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.extrude_region_move( \
+            MESH_OT_extrude_region={"mirror":False},
+            TRANSFORM_OT_translate={
+                "value":(0, 0, -const.planes_thickness),
+                "constraint_axis":(False, False, True),
+                "constraint_orientation":'NORMAL',
+                "mirror":False,
+                "proportional":'DISABLED',
+                "proportional_edit_falloff":'SMOOTH',
+                "proportional_size":1,
+                "snap":False,
+                "snap_target":'CLOSEST',
+                "snap_point":(0, 0, 0),
+                "snap_align":False,
+                "snap_normal":(0, 0, 0),
+                "texture_space":False,
+                "remove_on_cancel":False,
+                "release_confirm":False
+            })
+        bpy.ops.mesh.dissolve_limited()
+        bpy.ops.object.mode_set(mode='OBJECT')
+
         # add the material
         self.material = bpy.data.materials.new("C_Road.000")
         self.mesh.materials.append(self.material)
+        self.material.diffuse_color = (0, 0, 0)
 
         # add the texture
         m_tex = self.material.texture_slots.add()
