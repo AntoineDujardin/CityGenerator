@@ -86,5 +86,21 @@ class Road:
         for vertex in self.mesh.vertices:
             vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
         
+        #bpy.context.scene.objects.active = obj
+        #obj.select = True
+
+        # add the material
+        self.material = bpy.data.materials.new("Mat")
+        self.mesh.materials.append(self.material)
+
+        # add the texture
+        m_tex = self.material.texture_slots.add()
+        if self.orientation:
+            m_tex.texture = bpy.data.textures["vert_road_text"].copy()
+            m_tex.texture.repeat_y = round(self.y_size)
+        else:
+            m_tex.texture = bpy.data.textures["hor_road_text"].copy()
+            m_tex.texture.repeat_x = round(self.x_size)
+        
         # update
         self.mesh.update()

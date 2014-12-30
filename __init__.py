@@ -11,9 +11,10 @@ if "bpy" in locals():
     imp.reload(block)
     imp.reload(city)
     imp.reload(ground)
+    imp.reload(resources)
     imp.reload(road)
 else:
-    from city_generator import block, city, ground, road
+    from city_generator import block, city, ground, resources, road
 
 
 import bpy
@@ -64,6 +65,14 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         # Remove previous city (if any)
         bpy.ops.city.delete()
         
+        # Load the resources
+        resources.load_all()
+        
+        # set the environment
+        bpy.data.worlds["World"].light_settings.use_environment_light \
+            = True
+        
+        # Create the city
         city_instance = city.City(scene.city_x_size,
                                   scene.city_y_size,
                                   scene.min_block_size,
