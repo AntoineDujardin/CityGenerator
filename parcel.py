@@ -39,6 +39,20 @@ class Parcel:
         
         building = bpy.data.objects["residential_house_1"].copy()
         building.name = "C_residential_house.000"
+        
+        # put the door at the ground level
+        x_door = self.x_center
+        y_door = self.y_center
+        if orientation == 0:
+            y_door = self.y_center - self.y_size/2
+        elif orientation == 1:
+            x_door = self.x_center + self.x_size/2
+        elif orientation == 2:
+            y_door = self.y_center + self.y_size/2
+        else:
+            x_door = self.x_center - self.x_size/2
+        
+        # locate
         building.location = (self.x_center, self.y_center,
             self.city.ground.altitude_f(self.x_center, self.y_center))
         scene.objects.active = building
