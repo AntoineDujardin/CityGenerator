@@ -4,9 +4,10 @@ if "Block" in locals():
     import imp
     imp.reload(const)
     imp.reload(crossroads)
+    imp.reload(parcel)
     imp.reload(road)
 else:
-    from city_generator import const, crossroads, road
+    from city_generator import const, crossroads, parcel, road
 
 
 import bpy
@@ -46,19 +47,12 @@ class Block:
             self.double_cut()
     
     
-    def create(self):
-        """Properly create the block."""
-        
-        self.city.blocks.add(self)
-        self.draw()
-    
-    
     def cut_y_axis(self):
         """Cut in y."""
         
         y_road_size = self.corrected_road_size(self.y_size)
         y_cut = random.uniform(self.city.min_block_size,
-            self.y_size-2*self.city.min_block_size-y_road_size)
+            self.y_size-self.city.min_block_size-y_road_size)
         Block(self.x_start, self.x_size, self.y_start, y_cut,
               self.decreased(y_road_size), self.city)
         road.Road(self.x_start, self.x_size, self.y_start+y_cut,
@@ -73,7 +67,7 @@ class Block:
         
         x_road_size = self.corrected_road_size(self.x_size)
         x_cut = random.uniform(self.city.min_block_size,
-            self.x_size-2*self.city.min_block_size-x_road_size)
+            self.x_size-self.city.min_block_size-x_road_size)
         Block(self.x_start, x_cut, self.y_start, self.y_size,
               self.decreased(x_road_size), self.city)
         road.Road(self.x_start+x_cut, x_road_size, self.y_start,
@@ -90,9 +84,9 @@ class Block:
         y_road_size = self.corrected_road_size(self.y_size)
         next_road_size = self.decreased(min(x_road_size, y_road_size))
         x_cut = random.uniform(self.city.min_block_size,
-            self.x_size-2*self.city.min_block_size-x_road_size)
+            self.x_size-self.city.min_block_size-x_road_size)
         y_cut = random.uniform(self.city.min_block_size,
-            self.y_size-2*self.city.min_block_size-y_road_size)
+            self.y_size-self.city.min_block_size-y_road_size)
         
         Block(self.x_start, x_cut, self.y_start, y_cut, next_road_size,
               self.city)
@@ -250,12 +244,161 @@ class Block:
         
         return (size + const.min_road_size)/2
     
-
-# test
-if __name__ == "__main__":
-    # initialize
-    blocks = set()
-    roads = set()
     
-    # make the block decomposition
-    Block(-50, 100, -25, 50, 1, 2, 7, blocks, roads)
+    def create(self):
+        """Properly create the block."""
+        
+        self.city.blocks.add(self)
+        
+        # draw it
+        self.draw()
+        
+        # parcel it
+        self.parcel()
+        
+    def parcel(self):
+        """Cut it into parcels."""
+        
+        # get the coordinates without pavement
+        parcels_x_start = self.x_start + const.pavement_size
+        parcels_x_size = self.x_size - 2*const.pavement_size
+        parcels_y_start = self.y_start + const.pavement_size
+        parcels_y_size = self.y_size - 2*const.pavement_size
+        
+        # create the corner buildings
+        min_corner_size = const.min_building_size
+        max_corner_size = min(parcels_x_size/3,
+                              parcels_y_size/3,
+                              const.max_building_size)
+        corner_building_sizes = list((0, 0, 0, 0))
+        for i in range(4):
+            corner_building_sizes[i] = random.uniform(min_corner_size,
+                                                      max_corner_size)
+        # S-W corner
+        parcel.Parcel(parcels_x_start + corner_building_sizes[0]/2,
+                      corner_building_sizes[0],
+                      parcels_y_start + corner_building_sizes[0]/2,
+                      corner_building_sizes[0], 0, self.city)
+        # S-E corner
+        parcel.Parcel(parcels_x_start + parcels_x_size \
+                        - corner_building_sizes[1]/2,
+                      corner_building_sizes[1],
+                      parcels_y_start + corner_building_sizes[1]/2,
+                      corner_building_sizes[1], 1, self.city)
+        # N-E corner
+        parcel.Parcel(parcels_x_start + parcels_x_size \
+                        - corner_building_sizes[2]/2,
+                      corner_building_sizes[2],
+                      parcels_y_start + parcels_y_size \
+                      - corner_building_sizes[2]/2,
+                      corner_building_sizes[2], 2, self.city)
+        # N-W corner
+        parcel.Parcel(parcels_x_start + corner_building_sizes[3]/2,
+                      corner_building_sizes[3],
+                      parcels_y_start + parcels_y_size \
+                        - corner_building_sizes[3]/2,
+                      corner_building_sizes[3], 3, self.city)
+        
+        # create the other buildings
+        # S face
+        parcels_side_x_sizes = self.cut_parcels_side(
+            parcels_x_size - corner_building_sizes[0] \
+                - corner_building_sizes[1])
+        parcels_side_x_starts = list(parcels_side_x_sizes)
+        temp_x_start = parcels_x_start + corner_building_sizes[0]
+        for i in range(len(parcels_side_x_sizes)):
+            parcels_side_x_starts[i] = temp_x_start
+            temp_x_start = temp_x_start + parcels_side_x_sizes[i]
+            parcel_y_size = random.uniform(
+                const.min_building_size,
+                min(parcels_side_x_starts[i] - parcels_x_start,
+                    parcels_x_start + parcels_x_size \
+                        - (parcels_side_x_starts[i] +
+                            parcels_side_x_sizes[i]),
+                    parcels_y_size/2,
+                    const.max_building_size))
+            parcel.Parcel(parcels_side_x_starts[i] \
+                          + parcels_side_x_sizes[i]/2,
+                          parcels_side_x_sizes[i],
+                          parcels_y_start + parcel_y_size/2,
+                          parcel_y_size, 0, self.city)
+        # E face
+        parcels_side_y_sizes = self.cut_parcels_side(
+            parcels_y_size - corner_building_sizes[1] \
+                - corner_building_sizes[2])
+        parcels_side_y_starts = list(parcels_side_y_sizes)
+        temp_y_start = parcels_y_start + corner_building_sizes[1]
+        for i in range(len(parcels_side_y_sizes)):
+            parcels_side_y_starts[i] = temp_y_start
+            temp_y_start = temp_y_start + parcels_side_y_sizes[i]
+            parcel_x_size = random.uniform(
+                const.min_building_size,
+                min(parcels_side_y_starts[i] - parcels_y_start,
+                    parcels_y_start + parcels_y_size \
+                        - (parcels_side_y_starts[i] +
+                            parcels_side_y_sizes[i]),
+                    parcels_x_size/2,
+                    const.max_building_size))
+            parcel.Parcel(parcels_x_start + parcels_x_size \
+                              - parcel_x_size/2,
+                          parcel_x_size,
+                          parcels_side_y_starts[i] \
+                          + parcels_side_y_sizes[i]/2,
+                          parcels_side_y_sizes[i], 0, self.city)
+        # N face
+        parcels_side_x_sizes = self.cut_parcels_side(
+            parcels_x_size - corner_building_sizes[2] \
+                - corner_building_sizes[3])
+        parcels_side_x_starts = list(parcels_side_x_sizes)
+        temp_x_start = parcels_x_start + corner_building_sizes[3]
+        for i in range(len(parcels_side_x_sizes)):
+            parcels_side_x_starts[i] = temp_x_start
+            temp_x_start = temp_x_start + parcels_side_x_sizes[i]
+            parcel_y_size = random.uniform(
+                const.min_building_size,
+                min(parcels_side_x_starts[i] - parcels_x_start,
+                    parcels_x_start + parcels_x_size \
+                        - (parcels_side_x_starts[i] +
+                            parcels_side_x_sizes[i]),
+                    parcels_y_size/2,
+                    const.max_building_size))
+            parcel.Parcel(parcels_side_x_starts[i] \
+                          + parcels_side_x_sizes[i]/2,
+                          parcels_side_x_sizes[i],
+                          parcels_y_start + parcels_y_size \
+                              - parcel_y_size/2,
+                          parcel_y_size, 0, self.city)
+        # E face
+        parcels_side_y_sizes = self.cut_parcels_side(
+            parcels_y_size - corner_building_sizes[3] \
+                - corner_building_sizes[0])
+        parcels_side_y_starts = list(parcels_side_y_sizes)
+        temp_y_start = parcels_y_start + corner_building_sizes[0]
+        for i in range(len(parcels_side_y_sizes)):
+            parcels_side_y_starts[i] = temp_y_start
+            temp_y_start = temp_y_start + parcels_side_y_sizes[i]
+            parcel_x_size = random.uniform(
+                const.min_building_size,
+                min(parcels_side_y_starts[i] - parcels_y_start,
+                    parcels_y_start + parcels_y_size \
+                        - (parcels_side_y_starts[i] +
+                            parcels_side_y_sizes[i]),
+                    parcels_x_size/2,
+                    const.max_building_size))
+            parcel.Parcel(parcels_x_start + parcel_x_size/2,
+                          parcel_x_size,
+                          parcels_side_y_starts[i] \
+                          + parcels_side_y_sizes[i]/2,
+                          parcels_side_y_sizes[i], 0, self.city)
+    
+    
+    def cut_parcels_side(self, length):
+        """From one length, give an array of length in such a way that
+        the sum stay constant and each as a standard building size."""
+        if length <= const.max_building_size:
+            return [length]
+        else:
+            a = random.uniform(const.min_building_size,
+                               length - const.min_building_size)
+            return self.cut_parcels_side(a) + \
+                self.cut_parcels_side(length - a)

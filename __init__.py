@@ -131,9 +131,9 @@ def register():
                                 max=200.0)
     bpy.types.Scene.min_block_size = \
         bpy.props.FloatProperty(name="Min block size", default=3.0,
-                                min=1.0, max=10.0)
+                                min=2.0, max=10.0)
     bpy.types.Scene.max_block_size = \
-        bpy.props.FloatProperty(name="Max block size", default=7.0,
+        bpy.props.FloatProperty(name="Max block size", default=10.0,
                                 min=3.0, max=30.0)
     bpy.types.Scene.road_size = \
         bpy.props.FloatProperty(name="Road size", default=2.0,
