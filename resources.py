@@ -46,7 +46,7 @@ def load(ofolder, oname):
     # append the resource
     s = os.sep
     opath = "//resources.blend\\{}\\{}".format(ofolder, oname)
-    dpath = bpy.utils.script_paths()[1] + \
+    dpath = bpy.utils.script_paths()[-1] + \
         ("{0}addons{0}city_generator{0}resources{0}resources.blend" + 
         "\\{1}\\").format(s, ofolder)
     
