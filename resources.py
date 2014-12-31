@@ -50,10 +50,12 @@ def load(ofolder, oname):
         ("{0}addons{0}city_generator{0}resources{0}resources.blend" + 
         "\\{1}\\").format(s, ofolder)
     
-    bpy.ops.wm.link_append(filepath=opath,
-                           filename=oname,
-                           directory=dpath,
-                           filemode=1,
-                           link=False,
-                           relative_path=True,
-                           active_layer=True)
+    if bpy.app.version[1] <= 69:
+        bpy.ops.wm.link_append(filepath=opath,
+                               filename=oname,
+                               directory=dpath,
+                               link=False)
+    else:
+        bpy.ops.wm.append(filepath=opath,
+                          filename=oname,
+                          directory=dpath)

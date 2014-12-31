@@ -159,6 +159,8 @@ class Crossroads:
         # add the texture
         m_tex = self.material.texture_slots.add()
         m_tex.texture = bpy.data.textures["crossroads"].copy()
+        m_tex.texture_coords = 'ORCO'
+        m_tex.texture.extension = 'CLIP'
         
         # update
         self.mesh.update()

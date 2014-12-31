@@ -126,11 +126,14 @@ class Road:
 
         # add the texture
         m_tex = self.material.texture_slots.add()
+        m_tex.texture_coords = 'ORCO'
         if self.orientation:
             m_tex.texture = bpy.data.textures["vert_road"].copy()
+            m_tex.texture.extension = 'REPEAT'
             m_tex.texture.repeat_y = round(self.y_size)
         else:
             m_tex.texture = bpy.data.textures["hor_road"].copy()
+            m_tex.texture.extension = 'REPEAT'
             m_tex.texture.repeat_x = round(self.x_size)
         
         # update

@@ -215,12 +215,16 @@ class Block:
         # add the regular texture
         m_tex = self.material.texture_slots.add()
         m_tex.texture = bpy.data.textures["pavement_regular"].copy()
+        m_tex.texture_coords = 'ORCO'
+        m_tex.texture.extension = 'REPEAT'
         m_tex.texture.repeat_x = round(10*self.x_size)
         m_tex.texture.repeat_y = round(10*self.y_size)
         
         # add the normal displacement texture
         m_tex = self.material.texture_slots.add()
         m_tex.texture = bpy.data.textures["pavement_nrm"].copy()
+        m_tex.texture_coords = 'ORCO'
+        m_tex.texture.extension = 'REPEAT'
         m_tex.texture.repeat_x = round(10*self.x_size)
         m_tex.texture.repeat_y = round(10*self.y_size)
         m_tex.use_map_color_diffuse = False
