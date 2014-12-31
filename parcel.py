@@ -9,6 +9,7 @@ else:
 
 import bpy
 import random
+from math import pi
 
 class Parcel:
     """Class managing the parcels."""
@@ -27,7 +28,25 @@ class Parcel:
         self.city = city
         
         # draw
-        self.draw()
+        #self.draw()
+        
+        # add building
+        self.add_building(orientation, city.scene)
+    
+    
+    def add_building(self, orientation, scene):
+        """Place a building in the parcel."""
+        
+        building = bpy.data.objects["residential_house_1"].copy()
+        building.name = "C_residential_house.000"
+        building.location = (self.x_center, self.y_center,
+            self.city.ground.altitude_f(self.x_center, self.y_center))
+        scene.objects.active = building
+        building.select = True
+        building.rotation_euler = (0, 0, orientation*pi/2)
+        building.scale[orientation % 2] = self.x_size
+        building.scale[(orientation + 1) % 2] = self.y_size
+        self.city.scene.objects.link(building)
     
     
     def draw(self):

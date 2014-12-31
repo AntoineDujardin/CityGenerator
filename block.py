@@ -179,8 +179,8 @@ class Block:
         # change altitude
         altitude_f = self.city.ground.altitude_f
         for vertex in self.mesh.vertices:
-            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y) + \
-                const.pavement_thickness
+            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y) \
+                + const.pavement_thickness
         
         # extrude
         bpy.ops.object.mode_set(mode='EDIT')
@@ -229,6 +229,107 @@ class Block:
         
         # update
         self.mesh.update()
+        
+        
+    def draw_grass(self):
+        """Draw the block grass."""
+        
+        # leave EDIT mode if needed
+        if bpy.context.object:
+            bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # create a plane
+        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0, 0, 0))
+        
+        # recover infos
+        self.scene = bpy.context.scene
+        self.object = bpy.context.object
+        self.mesh = self.object.data
+        
+        # rename
+        self.object.name = "C_Block_grass.000"
+        self.mesh.name = "C_Block_grass.000"
+        
+        # scale it
+        self.object.scale[0] = self.parcels_x_size
+        self.object.scale[1] = self.parcels_y_size
+        bpy.ops.object.transform_apply(scale=True)
+        
+        # locate it
+        self.object.location[0] = self.parcels_x_start \
+            + self.parcels_x_size / 2
+        self.object.location[1] = self.parcels_y_start \
+            + self.parcels_y_size / 2
+        bpy.ops.object.transform_apply(location=True)
+        
+        # subdivide it
+        if (self.parcels_x_size >= 2 * self.parcels_y_size
+            or self.parcels_y_size >= 2 * self.parcels_x_size):
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.context.tool_settings.mesh_select_mode = [False, True,
+                                                          False]
+            bpy.ops.object.mode_set(mode='OBJECT')
+            for vert in self.mesh.vertices:
+                vert.select = True
+            if self.parcels_x_size > self.parcels_y_size:
+                self.mesh.edges[0].select = True
+                self.mesh.edges[1].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(
+                    number_cuts=int(self.parcels_x_size
+                        / self.parcels_y_size))
+            else:
+                self.mesh.edges[2].select = True
+                self.mesh.edges[3].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.subdivide(
+                    number_cuts=int(self.parcels_y_size
+                        / self.parcels_x_size))
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.subdivide(
+            number_cuts=int(min(self.parcels_x_size,
+                                self.parcels_y_size)))
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # change altitude
+        altitude_f = self.city.ground.altitude_f
+        for vertex in self.mesh.vertices:
+            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y) \
+                + 2*const.pavement_thickness
+        
+        # extrude
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.mesh.extrude_region_move( \
+            MESH_OT_extrude_region={"mirror":False},
+            TRANSFORM_OT_translate={
+                "value":(0, 0, -const.planes_thickness),
+                "constraint_axis":(False, False, True),
+                "constraint_orientation":'NORMAL',
+                "mirror":False,
+                "proportional":'DISABLED',
+                "proportional_edit_falloff":'SMOOTH',
+                "proportional_size":1,
+                "snap":False,
+                "snap_target":'CLOSEST',
+                "snap_point":(0, 0, 0),
+                "snap_align":False,
+                "snap_normal":(0, 0, 0),
+                "texture_space":False,
+                "remove_on_cancel":False,
+                "release_confirm":False
+            })
+        bpy.ops.mesh.dissolve_limited()
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # add the material
+        self.material = bpy.data.materials["grass"].copy()
+        self.mesh.materials.append(self.material)
+        
+        # update
+        self.mesh.update()
     
     
     def corrected_road_size(self, block_size):
@@ -255,141 +356,142 @@ class Block:
         
         # parcel it
         self.parcel()
+        self.draw_grass()
         
     def parcel(self):
         """Cut it into parcels."""
         
         # get the coordinates without pavement
-        parcels_x_start = self.x_start + const.pavement_size
-        parcels_x_size = self.x_size - 2*const.pavement_size
-        parcels_y_start = self.y_start + const.pavement_size
-        parcels_y_size = self.y_size - 2*const.pavement_size
+        self.parcels_x_start = self.x_start + const.pavement_size
+        self.parcels_x_size = self.x_size - 2*const.pavement_size
+        self.parcels_y_start = self.y_start + const.pavement_size
+        self.parcels_y_size = self.y_size - 2*const.pavement_size
         
         # create the corner buildings
         min_corner_size = const.min_building_size
-        max_corner_size = min(parcels_x_size/3,
-                              parcels_y_size/3,
+        max_corner_size = min(self.parcels_x_size/3,
+                              self.parcels_y_size/3,
                               const.max_building_size)
         corner_building_sizes = list((0, 0, 0, 0))
         for i in range(4):
             corner_building_sizes[i] = random.uniform(min_corner_size,
                                                       max_corner_size)
         # S-W corner
-        parcel.Parcel(parcels_x_start + corner_building_sizes[0]/2,
+        parcel.Parcel(self.parcels_x_start + corner_building_sizes[0]/2,
                       corner_building_sizes[0],
-                      parcels_y_start + corner_building_sizes[0]/2,
+                      self.parcels_y_start + corner_building_sizes[0]/2,
                       corner_building_sizes[0], 0, self.city)
         # S-E corner
-        parcel.Parcel(parcels_x_start + parcels_x_size \
+        parcel.Parcel(self.parcels_x_start + self.parcels_x_size \
                         - corner_building_sizes[1]/2,
                       corner_building_sizes[1],
-                      parcels_y_start + corner_building_sizes[1]/2,
+                      self.parcels_y_start + corner_building_sizes[1]/2,
                       corner_building_sizes[1], 1, self.city)
         # N-E corner
-        parcel.Parcel(parcels_x_start + parcels_x_size \
+        parcel.Parcel(self.parcels_x_start + self.parcels_x_size \
                         - corner_building_sizes[2]/2,
                       corner_building_sizes[2],
-                      parcels_y_start + parcels_y_size \
+                      self.parcels_y_start + self.parcels_y_size \
                       - corner_building_sizes[2]/2,
                       corner_building_sizes[2], 2, self.city)
         # N-W corner
-        parcel.Parcel(parcels_x_start + corner_building_sizes[3]/2,
+        parcel.Parcel(self.parcels_x_start + corner_building_sizes[3]/2,
                       corner_building_sizes[3],
-                      parcels_y_start + parcels_y_size \
+                      self.parcels_y_start + self.parcels_y_size \
                         - corner_building_sizes[3]/2,
                       corner_building_sizes[3], 3, self.city)
         
         # create the other buildings
         # S face
         parcels_side_x_sizes = self.cut_parcels_side(
-            parcels_x_size - corner_building_sizes[0] \
+            self.parcels_x_size - corner_building_sizes[0] \
                 - corner_building_sizes[1])
         parcels_side_x_starts = list(parcels_side_x_sizes)
-        temp_x_start = parcels_x_start + corner_building_sizes[0]
+        temp_x_start = self.parcels_x_start + corner_building_sizes[0]
         for i in range(len(parcels_side_x_sizes)):
             parcels_side_x_starts[i] = temp_x_start
             temp_x_start = temp_x_start + parcels_side_x_sizes[i]
             parcel_y_size = random.uniform(
                 const.min_building_size,
-                min(parcels_side_x_starts[i] - parcels_x_start,
-                    parcels_x_start + parcels_x_size \
+                min(parcels_side_x_starts[i] - self.parcels_x_start,
+                    self.parcels_x_start + self.parcels_x_size \
                         - (parcels_side_x_starts[i] +
                             parcels_side_x_sizes[i]),
-                    parcels_y_size/2,
+                    self.parcels_y_size/2,
                     const.max_building_size))
             parcel.Parcel(parcels_side_x_starts[i] \
                           + parcels_side_x_sizes[i]/2,
                           parcels_side_x_sizes[i],
-                          parcels_y_start + parcel_y_size/2,
+                          self.parcels_y_start + parcel_y_size/2,
                           parcel_y_size, 0, self.city)
         # E face
         parcels_side_y_sizes = self.cut_parcels_side(
-            parcels_y_size - corner_building_sizes[1] \
+            self.parcels_y_size - corner_building_sizes[1] \
                 - corner_building_sizes[2])
         parcels_side_y_starts = list(parcels_side_y_sizes)
-        temp_y_start = parcels_y_start + corner_building_sizes[1]
+        temp_y_start = self.parcels_y_start + corner_building_sizes[1]
         for i in range(len(parcels_side_y_sizes)):
             parcels_side_y_starts[i] = temp_y_start
             temp_y_start = temp_y_start + parcels_side_y_sizes[i]
             parcel_x_size = random.uniform(
                 const.min_building_size,
-                min(parcels_side_y_starts[i] - parcels_y_start,
-                    parcels_y_start + parcels_y_size \
+                min(parcels_side_y_starts[i] - self.parcels_y_start,
+                    self.parcels_y_start + self.parcels_y_size \
                         - (parcels_side_y_starts[i] +
                             parcels_side_y_sizes[i]),
-                    parcels_x_size/2,
+                    self.parcels_x_size/2,
                     const.max_building_size))
-            parcel.Parcel(parcels_x_start + parcels_x_size \
+            parcel.Parcel(self.parcels_x_start + self.parcels_x_size \
                               - parcel_x_size/2,
                           parcel_x_size,
                           parcels_side_y_starts[i] \
                           + parcels_side_y_sizes[i]/2,
-                          parcels_side_y_sizes[i], 0, self.city)
+                          parcels_side_y_sizes[i], 1, self.city)
         # N face
         parcels_side_x_sizes = self.cut_parcels_side(
-            parcels_x_size - corner_building_sizes[2] \
+            self.parcels_x_size - corner_building_sizes[2] \
                 - corner_building_sizes[3])
         parcels_side_x_starts = list(parcels_side_x_sizes)
-        temp_x_start = parcels_x_start + corner_building_sizes[3]
+        temp_x_start = self.parcels_x_start + corner_building_sizes[3]
         for i in range(len(parcels_side_x_sizes)):
             parcels_side_x_starts[i] = temp_x_start
             temp_x_start = temp_x_start + parcels_side_x_sizes[i]
             parcel_y_size = random.uniform(
                 const.min_building_size,
-                min(parcels_side_x_starts[i] - parcels_x_start,
-                    parcels_x_start + parcels_x_size \
+                min(parcels_side_x_starts[i] - self.parcels_x_start,
+                    self.parcels_x_start + self.parcels_x_size \
                         - (parcels_side_x_starts[i] +
                             parcels_side_x_sizes[i]),
-                    parcels_y_size/2,
+                    self.parcels_y_size/2,
                     const.max_building_size))
             parcel.Parcel(parcels_side_x_starts[i] \
                           + parcels_side_x_sizes[i]/2,
                           parcels_side_x_sizes[i],
-                          parcels_y_start + parcels_y_size \
+                          self.parcels_y_start + self.parcels_y_size \
                               - parcel_y_size/2,
-                          parcel_y_size, 0, self.city)
-        # E face
+                          parcel_y_size, 2, self.city)
+        # W face
         parcels_side_y_sizes = self.cut_parcels_side(
-            parcels_y_size - corner_building_sizes[3] \
+            self.parcels_y_size - corner_building_sizes[3] \
                 - corner_building_sizes[0])
         parcels_side_y_starts = list(parcels_side_y_sizes)
-        temp_y_start = parcels_y_start + corner_building_sizes[0]
+        temp_y_start = self.parcels_y_start + corner_building_sizes[0]
         for i in range(len(parcels_side_y_sizes)):
             parcels_side_y_starts[i] = temp_y_start
             temp_y_start = temp_y_start + parcels_side_y_sizes[i]
             parcel_x_size = random.uniform(
                 const.min_building_size,
-                min(parcels_side_y_starts[i] - parcels_y_start,
-                    parcels_y_start + parcels_y_size \
+                min(parcels_side_y_starts[i] - self.parcels_y_start,
+                    self.parcels_y_start + self.parcels_y_size \
                         - (parcels_side_y_starts[i] +
                             parcels_side_y_sizes[i]),
-                    parcels_x_size/2,
+                    self.parcels_x_size/2,
                     const.max_building_size))
-            parcel.Parcel(parcels_x_start + parcel_x_size/2,
+            parcel.Parcel(self.parcels_x_start + parcel_x_size/2,
                           parcel_x_size,
                           parcels_side_y_starts[i] \
                           + parcels_side_y_sizes[i]/2,
-                          parcels_side_y_sizes[i], 0, self.city)
+                          parcels_side_y_sizes[i], 3, self.city)
     
     
     def cut_parcels_side(self, length):

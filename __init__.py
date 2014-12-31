@@ -125,10 +125,10 @@ def register():
     
     bpy.types.Scene.city_x_size = \
         bpy.props.FloatProperty(name="X size", default=30.0, min=1.0,
-                                max=200.0)
+                                max=100.0)
     bpy.types.Scene.city_y_size = \
         bpy.props.FloatProperty(name="Y size", default=30.0, min=1.0,
-                                max=200.0)
+                                max=100.0)
     bpy.types.Scene.min_block_size = \
         bpy.props.FloatProperty(name="Min block size", default=3.0,
                                 min=2.0, max=10.0)

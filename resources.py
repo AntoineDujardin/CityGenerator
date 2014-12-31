@@ -3,12 +3,22 @@ import os
 
 def load_all(scene):
     """Load all the needed resources."""
+    load_material("grass")
     load_texture("vert_road")
     load_texture("hor_road")
     load_texture("crossroads")
     load_texture("pavement_regular")
     load_texture("pavement_nrm")
     load_object("traffic_lights", scene)
+    load_object("residential_house_1", scene)
+
+
+def load_material(oname):
+    """Append a material."""
+    
+    # load material iff not already existant
+    if oname not in bpy.data.textures.keys():
+        load("Material", oname)
 
 
 def load_texture(oname):

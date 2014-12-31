@@ -82,7 +82,7 @@ class Ground:
 
     
     @staticmethod
-    def mound_altitude_f(altitude=5, sharpening=0.003):
+    def mound_altitude_f(altitude=2, sharpening=0.003):
         """Create a function giving an altitude that give a mound."""
         return (lambda x, y:
             altitude*math.exp(-sharpening*(x**2+y**2)))
