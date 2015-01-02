@@ -66,7 +66,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         bpy.ops.city.delete()
         
         # Load the resources
-        resources.load_all(scene)
+        resources.load_all()
         parcel.Parcel.load_buildings()
         
         # set the environment
