@@ -10,9 +10,10 @@ if "bpy" in locals():
     import imp
     imp.reload(city)
     imp.reload(const)
+    imp.reload(parcel)
     imp.reload(resources)
 else:
-    from city_generator import city, const, resources
+    from city_generator import city, const, parcel, resources
 
 
 import bpy
@@ -66,6 +67,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         
         # Load the resources
         resources.load_all(scene)
+        parcel.Parcel.load_buildings()
         
         # set the environment
         bpy.data.worlds["World"].light_settings.use_environment_light \
@@ -76,7 +78,9 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.city_y_size,
                                   scene.min_block_size,
                                   scene.max_block_size,
-                                  scene.road_size, scene)
+                                  scene.road_size,
+                                  scene.building_z_var,
+                                  scene)
         
         return {'FINISHED'}
 
@@ -123,22 +127,42 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
 def register():
     bpy.utils.register_module(__name__)
     
-    bpy.types.Scene.city_x_size = \
-        bpy.props.FloatProperty(name="X size", default=30.0, min=1.0,
-                                max=100.0)
-    bpy.types.Scene.city_y_size = \
-        bpy.props.FloatProperty(name="Y size", default=30.0, min=1.0,
-                                max=100.0)
-    bpy.types.Scene.min_block_size = \
-        bpy.props.FloatProperty(name="Min block size", default=3.0,
-                                min=2.0, max=10.0)
-    bpy.types.Scene.max_block_size = \
-        bpy.props.FloatProperty(name="Max block size", default=10.0,
-                                min=3.0, max=30.0)
-    bpy.types.Scene.road_size = \
-        bpy.props.FloatProperty(name="Road size", default=2.0,
-                                min=const.min_road_size,
-                                max=5.0)
+    bpy.types.Scene.city_x_size = bpy.props.FloatProperty(
+        name="X size",
+        description="City size in the x axis",
+        default=30.0,
+        min=1.0,
+        max=100.0)
+    bpy.types.Scene.city_y_size = bpy.props.FloatProperty(
+        name="Y size",
+        description="City size in the z axis",
+        default=30.0,
+        min=1.0,
+        max=100.0)
+    bpy.types.Scene.min_block_size = bpy.props.FloatProperty(
+        name="Min block size",
+        description="Minimal size for the blocks",
+        default=3.0,
+        min=2.0,
+        max=10.0)
+    bpy.types.Scene.max_block_size = bpy.props.FloatProperty(
+        name="Max block size",
+        description="Maximal size for the blocks",
+        default=10.0,
+        min=3.0,
+        max=30.0)
+    bpy.types.Scene.road_size = bpy.props.FloatProperty(
+        name="Road size",
+        description="Size of the main roads",
+        default=2.0,
+        min=const.min_road_size,
+        max=5.0)
+    bpy.types.Scene.building_z_var = bpy.props.FloatProperty(
+        name="Building z var",
+        description="Relative variance for the buildings height",
+        default=0.05,
+        min=0,
+        max=0.1)
 
 
 def unregister():

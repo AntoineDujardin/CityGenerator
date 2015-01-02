@@ -8,6 +8,7 @@ else:
 
 
 import bpy
+import math
 import random
 from math import pi
 
@@ -37,7 +38,26 @@ class Parcel:
     def add_building(self, orientation, scene):
         """Place a building in the parcel."""
         
-        building = bpy.data.objects["residential_house_1"].copy()
+        # because of the rotation, x and y index may be interverted
+        x_index = orientation % 2
+        y_index = (orientation + 1) % 2
+        
+        # select one building: the one that fits as good as possible
+        stretchings = [0] * len(residential_houses)
+        for i, house in enumerate(residential_houses):
+            dimensions = residential_houses[i].dimensions
+            # get the stretching degree:
+            # the closest to zero, the fittest.
+            stretchings[i] = (math.log(dimensions[x_index] 
+                / dimensions[y_index] * self.y_size / self.x_size))**2
+        best_strech = min(stretchings)
+        arg_best = list()
+        for i, value in enumerate(stretchings):
+            # find the best one and other that are close
+            if value <= 1.1 * best_strech:
+                arg_best.append(i)
+        chosen_model = residential_houses[random.choice(arg_best)]
+        building = chosen_model.copy()
         building.name = "C_residential_house.000"
         
         # put the door at the ground level
@@ -58,8 +78,13 @@ class Parcel:
         scene.objects.active = building
         building.select = True
         building.rotation_euler = (0, 0, orientation*pi/2)
-        building.scale[orientation % 2] = self.x_size
-        building.scale[(orientation + 1) % 2] = self.y_size
+        building.scale[x_index] = self.x_size \
+            / building.dimensions[x_index]
+        building.scale[y_index] = self.y_size \
+            / building.dimensions[y_index]
+        building.scale[2] = max(0.7,
+                                random.gauss(1,
+                                             self.city.building_z_var))
         self.city.scene.objects.link(building)
     
     
@@ -161,3 +186,13 @@ class Parcel:
         
         # update
         self.mesh.update()
+
+
+    @classmethod
+    def load_buildings(self):
+        global residential_houses
+        residential_houses = list()
+        
+        for key, object in bpy.data.objects.items():
+            if key.startswith("residential_house"):
+                residential_houses.append(object)

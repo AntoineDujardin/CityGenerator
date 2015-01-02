@@ -11,6 +11,7 @@ def load_all(scene):
     load_texture("pavement_nrm")
     load_object("traffic_lights", scene)
     load_object("residential_house_1", scene)
+    load_object("residential_house_2", scene)
 
 
 def load_material(oname):

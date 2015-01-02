@@ -14,7 +14,7 @@ class City:
     """Class managing the creation of the whole city."""
     
     def __init__(self, city_x_size, city_y_size, min_block_size,
-                 max_block_size, road_size, scene):
+                 max_block_size, road_size, building_z_var, scene):
         """Create the city"""
         
         # save the values
@@ -23,6 +23,7 @@ class City:
         self.min_block_size = min_block_size
         self.max_block_size = max_block_size
         self.road_size = road_size
+        self.building_z_var = building_z_var
         self.scene = scene
         
         # initialize
