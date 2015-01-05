@@ -25,9 +25,6 @@ class Road:
         self.orientation = orientation
         self.city = city
         
-        # add itself to the city roads
-        self.city.roads.add(self)
-        
         # draw itself
         self.draw()
 

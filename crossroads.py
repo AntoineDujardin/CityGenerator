@@ -24,9 +24,6 @@ class Crossroads:
         self.y_size = y_size
         self.city = city
         
-        # add itself to the city roads
-        self.city.roads.add(self)
-        
         # draw itself
         self.draw()
         
