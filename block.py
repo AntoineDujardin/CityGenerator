@@ -23,8 +23,12 @@ class Block:
         self.y_start = y_start
         self.y_size = y_size
         self.city = city
-    
-        self.draw()
+        
+        # get the coordinates without pavement
+        self.parcels_x_start = self.x_start + const.pavement_size
+        self.parcels_x_size = self.x_size - 2*const.pavement_size
+        self.parcels_y_start = self.y_start + const.pavement_size
+        self.parcels_y_size = self.y_size - 2*const.pavement_size
     
     def draw(self):
         """Draw the block."""
@@ -68,14 +72,11 @@ class Block:
         """Draw the block grass."""
         
         # draw the plane
-        object = drawer.draw_relief_plane(
-            x_start + const.pavement_size,
-            x_size - 2*const.pavement_size,
-            y_start + const.pavement_size,
-            y_size - 2*const.pavement_size,
-            "Grass_Block",
+        object = drawer.draw_relief_plane(self.parcels_x_start, 
+            self.parcels_x_size, self.parcels_y_start,
+            self.parcels_y_size, "Grass_Block",
             self.city.ground.altitude_f,
-            const.pavement_thickness
+            2*const.pavement_thickness
         )
         
         # add the material
@@ -84,15 +85,17 @@ class Block:
         mesh.materials.append(material)
         
         # update
-        self.mesh.update()
+        mesh.update()
     
     
     def cut_length(self, length, min_l, max_l):
         """From one length, give an array of lengths between min_l and
-        max_l. The latter should be at least twice as big as the first."""
+        max_l. The latter should be at least twice as big as the
+        first."""
+        
         if length <= max_l:
             return [length]
         else:
             a = random.uniform(min_l, length - min_l)
-            return self.cut_parcels_side(a) + \
-                self.cut_parcels_side(length - a)
+            return self.cut_length(a, min_l, max_l) + \
+                self.cut_length(length - a, min_l, max_l)

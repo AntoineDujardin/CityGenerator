@@ -15,7 +15,7 @@ from math import pi
 class Parcel:
     """Class managing the parcels."""
     
-    def __init__(self, x_center, x_size, y_center, y_size, orientation,
+    def __init__(self, x_start, x_size, y_start, y_size, orientation,
                  city, building_type="residential_house"):
         """Create a new parcel and subdivide it.
         The orientation represent the orientation of the facade.
@@ -26,9 +26,9 @@ class Parcel:
         """
         
         # save the values
-        self.x_center = x_center
+        self.x_center = x_start + x_size/2
         self.x_size = x_size
-        self.y_center = y_center
+        self.y_center = y_start + y_size/2
         self.y_size = y_size
         self.building_type = building_type
         self.city = city
@@ -51,8 +51,9 @@ class Parcel:
             dimensions = target_buildings[i].dimensions
             # get the stretching degree:
             # the closest to zero, the fittest.
-            stretchings[i] = (math.log(dimensions[x_index] 
-                / dimensions[y_index] * self.y_size / self.x_size))**2
+            stretchings[i] = (
+                math.log(dimensions[x_index] / self.x_size)**2
+                + math.log(dimensions[y_index] / self.y_size)**2)
         best_strech = min(stretchings)
         arg_best = list()
         for i, value in enumerate(stretchings):
@@ -61,7 +62,7 @@ class Parcel:
                 arg_best.append(i)
         chosen_model = target_buildings[random.choice(arg_best)]
         building = chosen_model.copy()
-        building.name = "".join("C_", building_type, ".000")
+        building.name = "".join(("C_", building_type, ".000"))
         
         # put the door at the ground level
         x_door = self.x_center

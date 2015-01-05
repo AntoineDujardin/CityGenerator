@@ -43,6 +43,10 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'road_size')
         row = layout.row()
+        row.prop(scene, 'building_z_var')
+        row = layout.row()
+        row.prop(scene, 'center_radius')
+        row = layout.row()
         row.operator('city.generate')
         row.operator('city.delete')
 
@@ -80,6 +84,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.max_block_size,
                                   scene.road_size,
                                   scene.building_z_var,
+                                  scene.center_radius,
                                   scene)
         
         return {'FINISHED'}
@@ -163,6 +168,12 @@ def register():
         default=0.05,
         min=0,
         max=0.1)
+    bpy.types.Scene.center_radius = bpy.props.FloatProperty(
+        name="Center relative radius",
+        description="Relative radius of the city center",
+        default = 0.2,
+        min=0,
+        max=1)
 
 
 def unregister():

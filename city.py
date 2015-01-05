@@ -3,39 +3,48 @@
 if "City" in locals():
     import imp
     imp.reload(block)
+    imp.reload(business_tower_block)
     imp.reload(const)
     imp.reload(crossroads)
     imp.reload(ground)
+    imp.reload(residential_house_block)
     imp.reload(road)
 else:
-    from city_generator import block, const, crossroads, ground, road
+    from city_generator import block, business_tower_block, const, \
+        crossroads, ground, residential_house_block, road
 
 
 import bpy
+import math
 import random
 
 class City:
     """Class managing the creation of the whole city."""
     
     def __init__(self, city_x_size, city_y_size, min_block_size,
-                 max_block_size, road_size, building_z_var, scene):
+                 max_block_size, road_size, building_z_var,
+                 center_radius, scene):
         """Create the city"""
         
         # save the values
-        self.city_x_size = city_x_size
-        self.city_y_size = city_y_size
+        self.x_size = city_x_size
+        self.y_size = city_y_size
         self.min_block_size = min_block_size
         self.max_block_size = max_block_size
         self.road_size = road_size
         self.building_z_var = building_z_var
+        self.center_radius = center_radius
         self.scene = scene
+        
+        # calculate the radius
+        self.radius = math.hypot(self.x_size, self.y_size)/2
         
         # create the ground
         self.ground = ground.Ground(city_x_size, city_y_size)
         
         # make the block decomposition
-        self.cut_blocks(-self.city_x_size/2, self.city_x_size,
-                        -self.city_y_size/2, self.city_y_size,
+        self.cut_blocks(-self.x_size/2, self.x_size,
+                        -self.y_size/2, self.y_size,
                         road_size)
 
 
@@ -46,7 +55,7 @@ class City:
         if (x_size <= self.max_block_size
             and y_size <= self.max_block_size):
             # block should not be cutted further, create it
-            block.Block(x_start, x_size, y_start, y_size, self)
+            self.create_block(x_start, x_size, y_start, y_size)
         
         elif (x_size <= self.max_block_size):
             # y cut
@@ -60,6 +69,19 @@ class City:
             # double cut
             self.double_cut(x_start, x_size, y_start, y_size, road_size)
 
+    
+    def create_block(self, x_start, x_size, y_start, y_size):
+        """Create the block."""
+        
+        if self.central_coef(x_start, x_size, y_start, y_size) \
+                <= self.center_radius:
+            business_tower_block.BusinessTowerBlock(x_start, x_size, \
+            y_start, y_size, self)
+        else:
+            residential_house_block.ResidentialHousesBlock(x_start, \
+                x_size, y_start, y_size, self)
+        
+    
 
     def cut_y_axis(self, x_start, x_size, y_start, y_size, road_size):
         """Cut in y."""
@@ -140,3 +162,15 @@ class City:
         """Return a decreased size, for the roads (size >= 1)."""
         
         return (size + const.min_road_size)/2
+
+
+    def central_coef(self, x_start, x_size, y_start,
+                                 y_size):
+        """Return a coefficient of centralisation, between 0 and 1.
+        The closer to 0, the closer to the center."""
+        
+        x_center = x_start + x_size/2
+        y_center = y_start + y_size/2
+        block_dist = math.hypot(x_center, y_center)
+        
+        return block_dist/self.radius
