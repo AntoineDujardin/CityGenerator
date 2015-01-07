@@ -7,6 +7,7 @@ if "City" in locals():
     imp.reload(const)
     imp.reload(crossroads)
     imp.reload(ground)
+    imp.reload(joint_house_block)
     imp.reload(park_block)
     imp.reload(residential_building_block)
     imp.reload(residential_house_block)
@@ -17,6 +18,7 @@ else:
     from city_generator import const
     from city_generator import crossroads
     from city_generator import ground
+    from city_generator import joint_house_block
     from city_generator import park_block
     from city_generator import residential_building_block
     from city_generator import residential_house_block
@@ -97,6 +99,9 @@ class City:
                                                                 y_start,
                                                                 y_size,
                                                                 self)
+        elif coef <= 3*self.center_radius:
+            joint_house_block.JointHouseBlock(x_start, x_size, y_start,
+                                              y_size, self)
         else:
             residential_house_block.ResidentialHouseBlock(x_start,
                                                           x_size,

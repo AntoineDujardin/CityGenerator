@@ -30,9 +30,11 @@ class ResidentialBuildingBlock(block.Block):
         """Cut it into parcels."""
         
         # decompose in x
-        parcels_x_sizes = self.cut_length(self.x_size,
-                                          const.min_business_tower_size,
-                                          const.max_business_tower_size)
+        parcels_x_sizes = self.cut_length(
+            self.x_size,
+            const.min_residential_building_size,
+            const.max_residential_building_size
+        )
         len_x = len(parcels_x_sizes)
         parcels_x_starts = list((0,)) * len_x
         temp_x_start = self.parcels_x_start
@@ -41,9 +43,11 @@ class ResidentialBuildingBlock(block.Block):
             temp_x_start = temp_x_start + parcels_x_sizes[i]
         
         # decompose in y
-        parcels_y_sizes = self.cut_length(self.y_size,
-                                          const.min_business_tower_size,
-                                          const.max_business_tower_size)
+        parcels_y_sizes = self.cut_length(
+            self.y_size,
+            const.min_residential_building_size,
+            const.max_residential_building_size
+        )
         len_y = len(parcels_y_sizes)
         parcels_y_starts = list((0,)) * len_y
         temp_y_start = self.parcels_y_start
