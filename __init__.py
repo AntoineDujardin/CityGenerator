@@ -56,6 +56,8 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'elem_density')
         row = layout.row()
+        row.prop(scene, 'day')
+        row = layout.row()
         row.operator('city.generate')
         row.operator('city.delete')
 
@@ -83,10 +85,6 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         parcel.Parcel.load_buildings()
         park_block.ParkBlock.load_parks()
         
-        # set the environment
-        bpy.data.worlds["World"].light_settings.use_environment_light \
-            = True
-        
         # Create the city
         city_instance = city.City(scene.city_x_size,
                                   scene.city_y_size,
@@ -97,6 +95,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.center_radius,
                                   scene.park_proba,
                                   scene.elem_density,
+                                  scene.day,
                                   scene)
         
         return {'FINISHED'}
@@ -219,6 +218,11 @@ def register():
         min=0,
         max=0.5
     )
+    bpy.types.Scene.day = bpy.props.BoolProperty(
+        name="Day",
+        description="Day or night",
+        default=True
+    )
 
 
 def unregister():
@@ -232,6 +236,7 @@ def unregister():
     del bpy.types.Scene.center_radius
     del bpy.types.Scene.park_proba
     del bpy.types.Scene.elem_density
+    del bpy.types.Scene.day
 
 
 if __name__ == "__main__":

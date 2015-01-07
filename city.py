@@ -34,7 +34,7 @@ class City:
     
     def __init__(self, city_x_size, city_y_size, min_block_size,
                  max_block_size, road_size, size_var,
-                 center_radius, park_proba, elem_density, scene):
+                 center_radius, park_proba, elem_density, day, scene):
         """Create the city"""
         
         # save the values
@@ -47,6 +47,7 @@ class City:
         self.center_radius = center_radius
         self.park_proba = park_proba
         self.elem_density = elem_density
+        self.day = day
         self.scene = scene
         
         # calculate the radius
@@ -59,6 +60,58 @@ class City:
         self.cut_blocks(-self.x_size/2, self.x_size,
                         -self.y_size/2, self.y_size,
                         road_size)
+        
+        # lighting
+        self.set_environment_lightning(day)
+        self.add_sun_moon(day)
+        
+        # camera
+        self.add_camera()
+        
+    
+    def add_camera(self):
+        """Add a camera to the scene."""
+        
+        bpy.ops.object.camera_add()
+        camera = bpy.context.object
+        camera.name = "C_camera"
+        camera.location = (0, -1.1*self.y_size, self.y_size)
+        camera.rotation_euler = (math.pi/4, 0, 0)
+        
+        
+    def set_environment_lightning(self, day):
+        """Set the environment lightning of the scene."""
+        
+        bpy.data.worlds["World"].light_settings.use_environment_light \
+            = True
+        bpy.data.worlds["World"].light_settings.environment_energy \
+            = day + .1
+            
+        bpy.data.worlds["World"].light_settings.use_indirect_light \
+            = True
+        
+        bpy.data.worlds["World"].light_settings.gather_method \
+            = "APPROXIMATE"
+        
+        if day:
+            bpy.data.worlds["World"].horizon_color = (.1, .3, .5)
+        else:
+            bpy.data.worlds["World"].horizon_color = (0, 0, .05)
+    
+    
+    def add_sun_moon(self, day):
+        """Add a sun or a moon, depending on the day parameter."""
+        
+        bpy.ops.object.lamp_add(type='SUN', location=(0, 0, 20))
+        sun = bpy.context.object
+        sun.name = "C_Sun"
+        sun.rotation_euler = (math.pi/4, math.pi/4, 0)
+        sun.data.energy = day + .1
+        
+        if day:
+            sun.data.color = (1, 1, .7)
+        else:
+            sun.data.color = (1, 1, 1)
 
 
     def cut_blocks(self, x_start, x_size, y_start, y_size, road_size):
