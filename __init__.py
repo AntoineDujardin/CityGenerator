@@ -125,6 +125,18 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
             if key.startswith("C_"):
                 bpy.data.meshes.remove(mesh)
                 del mesh
+        
+        # erase the materials
+        for key, material in bpy.data.materials.items():
+            if key.startswith("C_"):
+                bpy.data.materials.remove(material)
+                del material
+
+        # erase the textures
+        for key, texture in bpy.data.textures.items():
+            if key.startswith("C_"):
+                bpy.data.textures.remove(texture)
+                del texture
     
         return {'FINISHED'}
 

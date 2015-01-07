@@ -16,7 +16,7 @@ class Parcel:
     """Class managing the parcels."""
     
     def __init__(self, x_start, x_size, y_start, y_size, orientation,
-                 city, building_type="residential_house"):
+                 city, building_type):
         """Create a new parcel and subdivide it.
         The orientation represent the orientation of the facade.
         S=0, E=1, N=2, W=3.
@@ -46,7 +46,7 @@ class Parcel:
         y_index = (orientation + 1) % 2
         
         # select one building: the one that fits as good as possible
-        target_buildings = buildings[building_type]
+        target_buildings = Parcel.buildings[building_type]
         stretchings = [0] * len(target_buildings)
         for i, house in enumerate(target_buildings):
             dimensions = target_buildings[i].dimensions
@@ -87,9 +87,11 @@ class Parcel:
         building.select = True
         building.rotation_euler = (0, 0, orientation*pi/2)
         building.scale[x_index] = self.x_size \
-            / building.dimensions[x_index]
+            / building.dimensions[x_index] \
+            * Parcel.buildings_ratio[building_type]
         building.scale[y_index] = self.y_size \
-            / building.dimensions[y_index]
+            / building.dimensions[y_index] \
+             * Parcel.buildings_ratio[building_type]
         building.scale[2] = max(
             0.7,
             random.gauss(1, self.city.building_z_var)
@@ -99,8 +101,7 @@ class Parcel:
 
     @classmethod
     def load_buildings(self):
-        global buildings
-        buildings = {
+        Parcel.buildings = {
             "residential_house": list(),
             "business_tower": list(),
             "residential_building": list()
@@ -108,8 +109,14 @@ class Parcel:
         
         for key, object in bpy.data.objects.items():
             if key.startswith("residential_house"):
-                buildings["residential_house"].append(object)
+                Parcel.buildings["residential_house"].append(object)
             elif key.startswith("business_tower"):
-                buildings["business_tower"].append(object)
+                Parcel.buildings["business_tower"].append(object)
             elif key.startswith("residential_building"):
-                buildings["residential_building"].append(object)
+                Parcel.buildings["residential_building"].append(object)
+        
+        Parcel.buildings_ratio = {
+            "residential_house": .8,
+            "business_tower": .7,
+            "residential_building": .6
+        }

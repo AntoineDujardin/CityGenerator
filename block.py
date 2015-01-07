@@ -48,6 +48,7 @@ class Block:
         # add the regular texture
         m_tex = material.texture_slots.add()
         m_tex.texture = bpy.data.textures["pavement_regular"].copy()
+        m_tex.texture.name = "C_pavement_regular"
         m_tex.texture_coords = 'ORCO'
         m_tex.texture.extension = 'REPEAT'
         m_tex.texture.repeat_x = round(10*self.x_size)
@@ -56,6 +57,7 @@ class Block:
         # add the normal displacement texture
         m_tex = material.texture_slots.add()
         m_tex.texture = bpy.data.textures["pavement_nrm"].copy()
+        m_tex.texture.name = "C_pavement_nrm"
         m_tex.texture_coords = 'ORCO'
         m_tex.texture.extension = 'REPEAT'
         m_tex.texture.repeat_x = round(10*self.x_size)
@@ -82,6 +84,7 @@ class Block:
         # add the material
         mesh = object.data
         material = bpy.data.materials["grass"].copy()
+        material.name = "C_grass"
         mesh.materials.append(material)
         
         # update

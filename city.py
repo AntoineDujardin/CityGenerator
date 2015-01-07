@@ -7,8 +7,8 @@ if "City" in locals():
     imp.reload(const)
     imp.reload(crossroads)
     imp.reload(ground)
+    imp.reload(residential_building_block)
     imp.reload(residential_house_block)
-    imp.reload(residential_tower_block)
     imp.reload(road)
 else:
     from city_generator import block
@@ -92,10 +92,10 @@ class City:
                                                                 y_size,
                                                                 self)
         else:
-            residential_house_block.ResidentialHousesBlock(x_start,
-                                                           x_size,
-                                                           y_start,
-                                                           y_size, self)
+            residential_house_block.ResidentialHouseBlock(x_start,
+                                                          x_size,
+                                                          y_start,
+                                                          y_size, self)
         
     
 
