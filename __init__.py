@@ -11,9 +11,14 @@ if "bpy" in locals():
     imp.reload(city)
     imp.reload(const)
     imp.reload(parcel)
+    imp.reload(park_block)
     imp.reload(resources)
 else:
-    from city_generator import city, const, parcel, resources
+    from city_generator import city
+    from city_generator import const
+    from city_generator import parcel
+    from city_generator import park_block
+    from city_generator import resources
 
 
 import bpy
@@ -72,6 +77,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         # Load the resources
         resources.load_all()
         parcel.Parcel.load_buildings()
+        park_block.ParkBlock.load_parks()
         
         # set the environment
         bpy.data.worlds["World"].light_settings.use_environment_light \
@@ -85,6 +91,8 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.road_size,
                                   scene.building_z_var,
                                   scene.center_radius,
+                                  0.2,
+                                  0.3,
                                   scene)
         
         return {'FINISHED'}

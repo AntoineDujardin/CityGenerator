@@ -7,6 +7,7 @@ if "City" in locals():
     imp.reload(const)
     imp.reload(crossroads)
     imp.reload(ground)
+    imp.reload(park_block)
     imp.reload(residential_building_block)
     imp.reload(residential_house_block)
     imp.reload(road)
@@ -16,6 +17,7 @@ else:
     from city_generator import const
     from city_generator import crossroads
     from city_generator import ground
+    from city_generator import park_block
     from city_generator import residential_building_block
     from city_generator import residential_house_block
     from city_generator import road
@@ -29,8 +31,8 @@ class City:
     """Class managing the creation of the whole city."""
     
     def __init__(self, city_x_size, city_y_size, min_block_size,
-                 max_block_size, road_size, building_z_var,
-                 center_radius, scene):
+                 max_block_size, road_size, size_var,
+                 center_radius, park_proba, elem_density, scene):
         """Create the city"""
         
         # save the values
@@ -39,8 +41,10 @@ class City:
         self.min_block_size = min_block_size
         self.max_block_size = max_block_size
         self.road_size = road_size
-        self.building_z_var = building_z_var
+        self.size_var = size_var
         self.center_radius = center_radius
+        self.park_proba = park_proba
+        self.elem_density = elem_density
         self.scene = scene
         
         # calculate the radius
@@ -79,9 +83,11 @@ class City:
     
     def create_block(self, x_start, x_size, y_start, y_size):
         """Create the block."""
-        
         coef = self.central_coef(x_start, x_size, y_start, y_size)
-        if coef <= self.center_radius:
+        
+        if random.uniform(0, 1) <= self.park_proba:
+            park_block.ParkBlock(x_start, x_size, y_start, y_size, self)
+        elif coef <= self.center_radius:
             business_tower_block.BusinessTowerBlock(x_start, x_size,
                                                     y_start, y_size,
                                                     self)

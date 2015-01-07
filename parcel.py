@@ -81,7 +81,8 @@ class Parcel:
         building.location = (
             self.x_center,
             self.y_center,
-            self.city.ground.altitude_f(self.x_center, self.y_center)
+            self.city.ground.altitude_f(x_door, y_door) \
+            + 2*const.pavement_thickness
         )
         scene.objects.active = building
         building.select = True
@@ -94,7 +95,7 @@ class Parcel:
              * Parcel.buildings_ratio[building_type]
         building.scale[2] = max(
             0.7,
-            random.gauss(1, self.city.building_z_var)
+            random.gauss(1, self.city.size_var)
         )
         self.city.scene.objects.link(building)
 
@@ -102,21 +103,29 @@ class Parcel:
     @classmethod
     def load_buildings(self):
         Parcel.buildings = {
-            "residential_house": list(),
             "business_tower": list(),
-            "residential_building": list()
+            "joint_house_corner": list(),
+            "joint_house_side": list(),
+            "residential_building": list(),
+            "residential_house": list()
         }
         
         for key, object in bpy.data.objects.items():
-            if key.startswith("residential_house"):
-                Parcel.buildings["residential_house"].append(object)
-            elif key.startswith("business_tower"):
+            if key.startswith("business_tower"):
                 Parcel.buildings["business_tower"].append(object)
+            elif key.startswith("joint_house_side"):
+                Parcel.buildings["joint_house_side"].append(object)
+            elif key.startswith("joint_house_corner"):
+                Parcel.buildings["joint_house_corner"].append(object)
             elif key.startswith("residential_building"):
                 Parcel.buildings["residential_building"].append(object)
-        
+            elif key.startswith("residential_house"):
+                Parcel.buildings["residential_house"].append(object)
+            
         Parcel.buildings_ratio = {
-            "residential_house": .8,
             "business_tower": .7,
-            "residential_building": .6
+            "joint_house_corner": 1,
+            "joint_house_side": 1,
+            "residential_building": .6,
+            "residential_house": .8
         }
