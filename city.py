@@ -34,7 +34,8 @@ class City:
     
     def __init__(self, city_x_size, city_y_size, min_block_size,
                  max_block_size, road_size, size_var,
-                 center_radius, park_proba, elem_density, day, scene):
+                 center_radius, park_proba, elem_density, day,
+                 relief_complexity, relief_amplitude, scene):
         """Create the city"""
         
         # save the values
@@ -54,7 +55,9 @@ class City:
         self.radius = math.hypot(self.x_size, self.y_size)/2
         
         # create the ground
-        self.ground = ground.Ground(city_x_size, city_y_size)
+        self.ground = ground.Ground(city_x_size, city_y_size,
+                                    relief_complexity,
+                                    relief_amplitude)
         
         # make the block decomposition
         self.cut_blocks(-self.x_size/2, self.x_size,

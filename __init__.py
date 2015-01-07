@@ -38,6 +38,10 @@ class CityGeneratorPanel(bpy.types.Panel):
         
         scene = context.scene
         row = layout.row()
+        row.prop(scene, 'relief_complexity')
+        row = layout.row()
+        row.prop(scene, 'relief_amplitude')
+        row = layout.row()
         row.prop(scene, 'city_x_size')
         row = layout.row()
         row.prop(scene, 'city_y_size')
@@ -96,6 +100,8 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.park_proba,
                                   scene.elem_density,
                                   scene.day,
+                                  scene.relief_complexity,
+                                  scene.relief_amplitude,
                                   scene)
         
         return {'FINISHED'}
@@ -155,6 +161,21 @@ class OBJECT_OT_DeleteCity(bpy.types.Operator):
 def register():
     bpy.utils.register_module(__name__)
     
+    bpy.types.Scene.relief_complexity = bpy.props.IntProperty(
+        name="Relief complexity",
+        description="Relief complexity index: 0 (no relief), " \
+            + "1 (single mound), 2 (several mounds)",
+        default=1,
+        min=0,
+        max=2
+    )
+    bpy.types.Scene.relief_amplitude = bpy.props.FloatProperty(
+        name="Relief_amplitude",
+        description="Approximation of the maximum amplitude",
+        default=10,
+        min=0,
+        max=5
+    )
     bpy.types.Scene.city_x_size = bpy.props.FloatProperty(
         name="X size",
         description="City size in the x axis",
@@ -227,6 +248,8 @@ def register():
 
 def unregister():
     bpy.utils.unregister_module(__name__)
+    del bpy.types.Scene.relief_amplitude
+    del bpy.types.Scene.relief_complexity
     del bpy.types.Scene.city_x_size
     del bpy.types.Scene.city_y_size
     del bpy.types.Scene.min_block_size

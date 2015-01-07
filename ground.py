@@ -7,82 +7,40 @@ class Ground:
     The ground is caracterized by its size and by its altitude
     in function of x and y."""
     
-    def __init__(self, x_size, y_size):
-        """Create a new ground with its size and altitude."""
+    def __init__(self, x_size, y_size, relief_complexity,
+        relief_amplitude):
+        """Create a new ground with its size and relief level.
+        The relief complexity is a integer between 0 (no relief)
+        an 2."""
         
         # save the values
         self.x_size = x_size
         self.y_size = y_size
         
         # define altitude_f
-        self.altitude_f = Ground.mound_altitude_f()
+        if relief_complexity == 0:
+            self.altitude_f = lambda x, y: 0
+        elif relief_complexity == 1:
+            self.altitude_f = Ground.mound_altitude_f(0, 0,
+                                                      relief_amplitude)
+        else:
+            x0 = random.uniform(-x_size/2, x_size/2)
+            x1 = random.uniform(-x_size/2, x_size/2)
+            x2 = random.uniform(-x_size/2, x_size/2)
+            y0 = random.uniform(-x_size/2, x_size/2)
+            y1 = random.uniform(-x_size/2, x_size/2)
+            y2 = random.uniform(-x_size/2, x_size/2)
+            altitude = relief_amplitude/2
+            self.altitude_f = (lambda x, y:
+                Ground.mound_altitude_f(x0, y0, altitude)(x, y)
+                + Ground.mound_altitude_f(x1, y1, altitude)(x, y)
+                + Ground.mound_altitude_f(x2, y2, altitude)(x, y))
         
-        # draw it
-        #self.draw()
-    
-    
-    def draw(self):
-        """Draw the ground."""
-        
-        # leave EDIT mode if needed
-        if bpy.context.object:
-            bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # create a plane
-        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0,0,0))
-        
-        # recover infos
-        self.scene = bpy.context.scene
-        self.object = bpy.context.object
-        self.mesh = self.object.data
-        
-        # rename
-        self.object.name = "C_Ground"
-        self.mesh.name = "C_Ground"
-        
-        # scale it
-        self.object.scale[0] = self.x_size
-        self.object.scale[1] = self.y_size
-        bpy.ops.object.transform_apply(scale=True)
-        
-        # subdivide it
-        if (self.x_size >= 2 * self.y_size
-            or self.y_size >= 2 * self.x_size):
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.mesh.select_all(action = 'DESELECT')
-            bpy.context.tool_settings.mesh_select_mode = [False, True,
-                                                          False]
-            bpy.ops.object.mode_set(mode='OBJECT')
-            for vert in self.mesh.vertices:
-                vert.select = True
-            if self.x_size > self.y_size:
-                self.mesh.edges[0].select = True
-                self.mesh.edges[1].select = True
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.subdivide(number_cuts=int(self.x_size
-                                                       / self.y_size))
-            else:
-                self.mesh.edges[2].select = True
-                self.mesh.edges[3].select = True
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.subdivide(number_cuts=int(self.y_size
-                                                       / self.x_size))
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
-        bpy.ops.mesh.subdivide(number_cuts=int(min(self.x_size,
-                                                   self.y_size)))
-        bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # change altitude
-        for vertex in self.mesh.vertices:
-            vertex.co.z = self.altitude_f(vertex.co.x, vertex.co.y)
-        
-        # update
-        self.mesh.update()
-
     
     @staticmethod
-    def mound_altitude_f(altitude=2, sharpening=0.003):
-        """Create a function giving an altitude that give a mound."""
+    def mound_altitude_f(x_0, y_0, altitude, sharpening=0.003):
+        """Create a function giving an altitude that creates a mound
+        centered in x_0, y_0 of with the given altitude and
+        sharpening."""
         return (lambda x, y:
-            altitude*math.exp(-sharpening*(x**2+y**2)))
+            altitude*math.exp(-sharpening*((x-x_0)**2+(y-y_0)**2)))
