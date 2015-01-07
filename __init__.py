@@ -48,7 +48,7 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'road_size')
         row = layout.row()
-        row.prop(scene, 'building_z_var')
+        row.prop(scene, 'size_var')
         row = layout.row()
         row.prop(scene, 'center_radius')
         row = layout.row()
@@ -93,7 +93,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.min_block_size,
                                   scene.max_block_size,
                                   scene.road_size,
-                                  scene.building_z_var,
+                                  scene.size_var,
                                   scene.center_radius,
                                   scene.park_proba,
                                   scene.elem_density,
@@ -191,9 +191,9 @@ def register():
         min=const.min_road_size,
         max=5.0
     )
-    bpy.types.Scene.building_z_var = bpy.props.FloatProperty(
-        name="Building z var",
-        description="Relative variance for the buildings height",
+    bpy.types.Scene.size_var = bpy.props.FloatProperty(
+        name="Size variance",
+        description="Relative variance for element heights and sizes",
         default=0.05,
         min=0,
         max=0.1
@@ -228,6 +228,10 @@ def unregister():
     del bpy.types.Scene.min_block_size
     del bpy.types.Scene.max_block_size
     del bpy.types.Scene.road_size
+    del bpy.types.Scene.size_var
+    del bpy.types.Scene.center_radius
+    del bpy.types.Scene.park_proba
+    del bpy.types.Scene.elem_density
 
 
 if __name__ == "__main__":
