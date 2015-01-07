@@ -52,6 +52,10 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'center_radius')
         row = layout.row()
+        row.prop(scene, 'park_proba')
+        row = layout.row()
+        row.prop(scene, 'elem_density')
+        row = layout.row()
         row.operator('city.generate')
         row.operator('city.delete')
 
@@ -91,8 +95,8 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.road_size,
                                   scene.building_z_var,
                                   scene.center_radius,
-                                  0.2,
-                                  0.3,
+                                  scene.park_proba,
+                                  scene.elem_density,
                                   scene)
         
         return {'FINISHED'}
@@ -157,43 +161,64 @@ def register():
         description="City size in the x axis",
         default=30.0,
         min=1.0,
-        max=100.0)
+        max=100.0
+    )
     bpy.types.Scene.city_y_size = bpy.props.FloatProperty(
         name="Y size",
         description="City size in the z axis",
         default=30.0,
         min=1.0,
-        max=100.0)
+        max=100.0
+    )
     bpy.types.Scene.min_block_size = bpy.props.FloatProperty(
         name="Min block size",
         description="Minimal size for the blocks",
         default=3.0,
         min=2.0,
-        max=10.0)
+        max=10.0
+    )
     bpy.types.Scene.max_block_size = bpy.props.FloatProperty(
         name="Max block size",
         description="Maximal size for the blocks",
         default=10.0,
         min=3.0,
-        max=30.0)
+        max=30.0
+    )
     bpy.types.Scene.road_size = bpy.props.FloatProperty(
         name="Road size",
         description="Size of the main roads",
         default=2.0,
         min=const.min_road_size,
-        max=5.0)
+        max=5.0
+    )
     bpy.types.Scene.building_z_var = bpy.props.FloatProperty(
         name="Building z var",
         description="Relative variance for the buildings height",
         default=0.05,
         min=0,
-        max=0.1)
+        max=0.1
+    )
     bpy.types.Scene.center_radius = bpy.props.FloatProperty(
         name="Center relative radius",
         description="Relative radius of the city center",
         default = 0.2,
         min=0,
-        max=1)
+        max=1
+    )
+    bpy.types.Scene.park_proba = bpy.props.FloatProperty(
+        name="Park probability",
+        description="Probability of a block being a park",
+        default=0.1,
+        min=0,
+        max=0.3
+    )
+    bpy.types.Scene.elem_density = bpy.props.FloatProperty(
+        name="Element density",
+        description="Density of elements like trees",
+        default=0.2,
+        min=0,
+        max=0.5
+    )
 
 
 def unregister():
