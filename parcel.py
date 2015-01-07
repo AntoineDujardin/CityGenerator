@@ -21,8 +21,9 @@ class Parcel:
         The orientation represent the orientation of the facade.
         S=0, E=1, N=2, W=3.
         The building_type can be:
-        - "residential_house";
-        - "business_tower".
+        - "business_tower";
+        - "residential_building";
+        - "residential_house".
         """
         
         # save the values
@@ -101,7 +102,8 @@ class Parcel:
         global buildings
         buildings = {
             "residential_house": list(),
-            "business_tower": list()
+            "business_tower": list(),
+            "residential_building": list()
         }
         
         for key, object in bpy.data.objects.items():
@@ -109,3 +111,5 @@ class Parcel:
                 buildings["residential_house"].append(object)
             elif key.startswith("business_tower"):
                 buildings["business_tower"].append(object)
+            elif key.startswith("residential_building"):
+                buildings["residential_building"].append(object)

@@ -8,10 +8,17 @@ if "City" in locals():
     imp.reload(crossroads)
     imp.reload(ground)
     imp.reload(residential_house_block)
+    imp.reload(residential_tower_block)
     imp.reload(road)
 else:
-    from city_generator import block, business_tower_block, const, \
-        crossroads, ground, residential_house_block, road
+    from city_generator import block
+    from city_generator import business_tower_block
+    from city_generator import const
+    from city_generator import crossroads
+    from city_generator import ground
+    from city_generator import residential_building_block
+    from city_generator import residential_house_block
+    from city_generator import road
 
 
 import bpy
@@ -73,13 +80,22 @@ class City:
     def create_block(self, x_start, x_size, y_start, y_size):
         """Create the block."""
         
-        if self.central_coef(x_start, x_size, y_start, y_size) \
-                <= self.center_radius:
-            business_tower_block.BusinessTowerBlock(x_start, x_size, \
-            y_start, y_size, self)
+        coef = self.central_coef(x_start, x_size, y_start, y_size)
+        if coef <= self.center_radius:
+            business_tower_block.BusinessTowerBlock(x_start, x_size,
+                                                    y_start, y_size,
+                                                    self)
+        elif coef <= 2*self.center_radius:
+            residential_building_block.ResidentialBuildingBlock(x_start,
+                                                                x_size,
+                                                                y_start,
+                                                                y_size,
+                                                                self)
         else:
-            residential_house_block.ResidentialHousesBlock(x_start, \
-                x_size, y_start, y_size, self)
+            residential_house_block.ResidentialHousesBlock(x_start,
+                                                           x_size,
+                                                           y_start,
+                                                           y_size, self)
         
     
 
