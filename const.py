@@ -20,3 +20,5 @@ max_residential_building_size = 5
 
 min_residential_houses_size = 0.5
 max_residential_houses_size = 3
+
+camera_z_offset = 1
