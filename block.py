@@ -30,8 +30,9 @@ class Block:
         self.parcels_y_start = self.y_start + const.pavement_size
         self.parcels_y_size = self.y_size - 2*const.pavement_size
     
-    def draw(self):
-        """Draw the block."""
+    def draw(self, gravel_texture=False):
+        """Draw the block.
+        Use pavement texture, exept if gravel is asked."""
         
         # draw the plane
         object = drawer.draw_relief_plane(self.x_start, self.x_size,
@@ -47,24 +48,28 @@ class Block:
 
         # add the regular texture
         m_tex = material.texture_slots.add()
-        m_tex.texture = bpy.data.textures["pavement_regular"].copy()
-        m_tex.texture.name = "C_pavement_regular"
+        if gravel_texture:
+            m_tex.texture = bpy.data.textures["gravel"].copy()
+        else:
+            m_tex.texture = bpy.data.textures["pavement_regular"].copy()
+        m_tex.texture.name = "C_pavement"
         m_tex.texture_coords = 'ORCO'
         m_tex.texture.extension = 'REPEAT'
         m_tex.texture.repeat_x = round(10*self.x_size)
         m_tex.texture.repeat_y = round(10*self.y_size)
         
-        # add the normal displacement texture
-        m_tex = material.texture_slots.add()
-        m_tex.texture = bpy.data.textures["pavement_nrm"].copy()
-        m_tex.texture.name = "C_pavement_nrm"
-        m_tex.texture_coords = 'ORCO'
-        m_tex.texture.extension = 'REPEAT'
-        m_tex.texture.repeat_x = round(10*self.x_size)
-        m_tex.texture.repeat_y = round(10*self.y_size)
-        m_tex.use_map_color_diffuse = False
-        m_tex.use_map_normal = True
-        m_tex.normal_factor = 5
+        if not gravel_texture:
+            # add the normal displacement texture
+            m_tex = material.texture_slots.add()
+            m_tex.texture = bpy.data.textures["pavement_nrm"].copy()
+            m_tex.texture.name = "C_pavement_nrm"
+            m_tex.texture_coords = 'ORCO'
+            m_tex.texture.extension = 'REPEAT'
+            m_tex.texture.repeat_x = round(10*self.x_size)
+            m_tex.texture.repeat_y = round(10*self.y_size)
+            m_tex.use_map_color_diffuse = False
+            m_tex.use_map_normal = True
+            m_tex.normal_factor = 5
         
         # update
         mesh.update()

@@ -26,7 +26,7 @@ class ParkBlock(block.Block):
         self.park_y_start = y_start + const.pavement_size
         self.park_y_size = y_size - 2*const.pavement_size
         
-        self.draw()
+        self.draw(gravel_texture=True)
         self.place_park()
     
     
