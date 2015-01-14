@@ -57,6 +57,13 @@ class ParkBlock(block.Block):
         # link
         self.city.scene.objects.link(park)
         
+        # add children (lakes)
+        for child_model in chosen_model.children:
+            child = child_model.copy()
+            child.name = "C_park_child.000"
+            child.parent = park
+            self.city.scene.objects.link(child)
+        
         # scale
         self.city.scene.objects.active = park
         park.select = True
@@ -78,6 +85,10 @@ class ParkBlock(block.Block):
         altitude_function = self.city.ground.altitude_f
         for vertex in park.data.vertices:
             vertex.co.z += altitude_function(vertex.co.x, vertex.co.y)
+        for child in park.children:
+            # child are moved without deformation
+            child.location[2] += altitude_function(child.location[0],
+                                                   child.location[1])
         
         # add trees
         self.place_trees([v.co for v in park.data.vertices])
@@ -125,7 +136,7 @@ class ParkBlock(block.Block):
         ParkBlock.trees = list()
         
         for key, object in bpy.data.objects.items():
-            if key.startswith("park"):
+            if key.startswith("park") or key.startswith("lake_park"):
                 ParkBlock.parks.append(object)
             elif key.startswith("tree"):
                 ParkBlock.trees.append(object)
