@@ -75,10 +75,18 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         global city_instance
         scene = context.scene
         
-        if (scene.city_x_size < scene.min_block_size or
-            scene.city_y_size < scene.min_block_size or
-            scene.max_block_size < (2*scene.min_block_size +
-                                    const.min_road_size)):
+        if scene.city_x_size < scene.min_block_size \
+            or scene.city_y_size < scene.min_block_size:
+            self.report({'ERROR_INVALID_INPUT'},
+                        "X and Y size should be at least equal to " \
+                            + "Min block size")
+            return {'CANCELLED'}
+        elif scene.max_block_size < (2*scene.min_block_size +
+                                    const.min_road_size):
+            self.report({'ERROR_INVALID_INPUT'},
+                        "Max block size should be at least equal to " \
+                            "two times Min block size + {}".format(
+                                const.min_road_size))
             return {'CANCELLED'}
         
         # Remove previous city (if any)
