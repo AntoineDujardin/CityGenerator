@@ -180,37 +180,47 @@ def register():
     bpy.types.Scene.relief_amplitude = bpy.props.FloatProperty(
         name="Relief_amplitude",
         description="Approximation of the maximum amplitude",
-        default=10,
+        default=3,
         min=0,
-        max=5
+        max=5,
+        precision=1,
+        step=10
     )
     bpy.types.Scene.city_x_size = bpy.props.FloatProperty(
         name="X size",
         description="City size in the x axis",
         default=30.0,
         min=1.0,
-        max=100.0
+        max=100.0,
+        precision=1,
+        step=50
     )
     bpy.types.Scene.city_y_size = bpy.props.FloatProperty(
         name="Y size",
         description="City size in the z axis",
         default=30.0,
         min=1.0,
-        max=100.0
+        max=100.0,
+        precision=1,
+        step=50
     )
     bpy.types.Scene.min_block_size = bpy.props.FloatProperty(
         name="Min block size",
         description="Minimal size for the blocks",
         default=3.0,
         min=2.0,
-        max=10.0
+        max=10.0,
+        precision=1,
+        step=10
     )
     bpy.types.Scene.max_block_size = bpy.props.FloatProperty(
         name="Max block size",
         description="Maximal size for the blocks",
         default=10.0,
         min=3.0,
-        max=30.0
+        max=30.0,
+        precision=1,
+        step=10
     )
     bpy.types.Scene.road_size = bpy.props.FloatProperty(
         name="Road size",
@@ -224,14 +234,16 @@ def register():
         description="Relative variance for element heights and sizes",
         default=0.05,
         min=0,
-        max=0.1
+        max=0.1,
+        step=1
     )
     bpy.types.Scene.center_radius = bpy.props.FloatProperty(
         name="Center relative radius",
         description="Relative radius of the city center",
         default = 0.2,
         min=0,
-        max=1
+        max=1,
+        step=1
     )
     bpy.types.Scene.park_proba = bpy.props.FloatProperty(
         name="Park probability",
