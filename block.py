@@ -29,6 +29,10 @@ class Block:
         self.parcels_x_size = self.x_size - 2*const.pavement_size
         self.parcels_y_start = self.y_start + const.pavement_size
         self.parcels_y_size = self.y_size - 2*const.pavement_size
+        
+        # add details (lamps)
+        self.add_details()
+        
     
     def draw(self, gravel_texture=False):
         """Draw the block.
@@ -107,3 +111,37 @@ class Block:
             a = random.uniform(min_l, length - min_l)
             return self.cut_length(a, min_l, max_l) + \
                 self.cut_length(length - a, min_l, max_l)
+
+
+    def add_details(self):
+        """Add some details, like the lamps."""
+        
+        offset = const.pavement_size / 3
+        cut = lambda d: [offset] + \
+            self.cut_length(d - 2*offset, const.min_lamp_distance,
+                            const.max_lamp_distance)
+        dist = 0
+        for delta_dist in cut(self.x_size):
+            dist += delta_dist
+            self.add_lamp(self.x_start + dist,
+                           self.y_start + offset)
+            self.add_lamp(self.x_start + dist,
+                           self.y_start + self.y_size - offset)
+        dist = 0
+        for delta_dist in cut(self.y_size)[1:-1]:
+            # don't do the corners twice
+            dist += delta_dist
+            self.add_lamp(self.x_start + offset,
+                           self.y_start + dist)
+            self.add_lamp(self.x_start + self.x_size - offset,
+                           self.y_start + dist)
+    
+    
+    def add_lamp(self, x, y):
+        """Add some lamps at the given coordinates."""
+        
+        lamp = bpy.data.objects["ramplamp"].copy()
+        lamp.name = "C_Lamp.000"
+        lamp.location = (x, y,
+            self.city.ground.altitude_f(x, y))
+        self.city.scene.objects.link(lamp)

@@ -34,7 +34,7 @@ class Crossroads:
     def add_details(self):
         """Add some details, like the traffic lights."""
         
-        offset = const.pavement_size / 2
+        offset = 2*const.pavement_size / 3
         self.add_traffic_lights(self.x_start - offset,
                                 self.y_start - offset,
                                 -pi/2)

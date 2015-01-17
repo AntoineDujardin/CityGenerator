@@ -65,8 +65,7 @@ class City:
                         road_size, True)
         
         # lighting
-        self.set_environment_lightning(day)
-        self.add_sun_moon(day)
+        self.set_lightning(day)
         
         # configure animation
         bpy.data.scenes["Scene"].frame_start = 1
@@ -121,13 +120,14 @@ class City:
         bpy.ops.object.parent_set(type="FOLLOW")
 
         
-    def set_environment_lightning(self, day):
-        """Set the environment lightning of the scene."""
+    def set_lightning(self, day):
+        """Set the lightning of the scene."""
         
+        # environment
         bpy.data.worlds["World"].light_settings.use_environment_light \
             = True
         bpy.data.worlds["World"].light_settings.environment_energy \
-            = day + .1
+            = day + .01
             
         bpy.data.worlds["World"].light_settings.use_indirect_light \
             = True
@@ -138,7 +138,13 @@ class City:
         if day:
             bpy.data.worlds["World"].horizon_color = (.1, .3, .5)
         else:
-            bpy.data.worlds["World"].horizon_color = (0, 0, .05)
+            bpy.data.worlds["World"].horizon_color = (0, 0, .01)
+            
+        # lamp material
+        bpy.data.materials["night_light"].emit = 1000 * (not day)
+        
+        # sun/moon
+        self.add_sun_moon(day)
     
     
     def add_sun_moon(self, day):
@@ -148,7 +154,7 @@ class City:
         sun = bpy.context.object
         sun.name = "C_Sun"
         sun.rotation_euler = (math.pi/4, math.pi/4, 0)
-        sun.data.energy = day + .1
+        sun.data.energy = day + .02
         
         if day:
             sun.data.color = (1, 1, .7)
