@@ -23,9 +23,5 @@ max_residential_building_size = 5
 min_residential_houses_size = 0.5
 max_residential_houses_size = 3
 
-# space between lamps on pavement
-min_lamp_distance = 1
-max_lamp_distance = 2
-
 # height of the camera
 camera_z_offset = 1

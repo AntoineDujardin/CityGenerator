@@ -35,7 +35,8 @@ class City:
     def __init__(self, city_x_size, city_y_size, min_block_size,
                  max_block_size, road_size, size_var,
                  center_radius, park_proba, elem_density, day,
-                 relief_complexity, relief_amplitude, scene):
+                 relief_complexity, relief_amplitude, lamp_distance,
+                 scene):
         """Create the city"""
         
         # save the values
@@ -49,6 +50,7 @@ class City:
         self.park_proba = park_proba
         self.elem_density = elem_density
         self.day = day
+        self.lamp_distance = lamp_distance
         self.scene = scene
         
         # calculate the radius

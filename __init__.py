@@ -60,6 +60,8 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'elem_density')
         row = layout.row()
+        row.prop(scene, 'lamp_distance')
+        row = layout.row()
         row.prop(scene, 'day')
         row = layout.row()
         row.operator('city.generate')
@@ -110,6 +112,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.day,
                                   scene.relief_complexity,
                                   scene.relief_amplitude,
+                                  scene.lamp_distance,
                                   scene)
         
         return {'FINISHED'}
@@ -232,15 +235,15 @@ def register():
     bpy.types.Scene.size_var = bpy.props.FloatProperty(
         name="Size variance",
         description="Relative variance for element heights and sizes",
-        default=0.05,
+        default=.05,
         min=0,
-        max=0.1,
+        max=.1,
         step=1
     )
     bpy.types.Scene.center_radius = bpy.props.FloatProperty(
         name="Center relative radius",
         description="Relative radius of the city center",
-        default = 0.2,
+        default = .2,
         min=0,
         max=1,
         step=1
@@ -248,16 +251,23 @@ def register():
     bpy.types.Scene.park_proba = bpy.props.FloatProperty(
         name="Park probability",
         description="Probability of a block being a park",
-        default=0.1,
+        default=.1,
         min=0,
-        max=0.3
+        max=.3
     )
     bpy.types.Scene.elem_density = bpy.props.FloatProperty(
         name="Element density",
         description="Density of elements like trees",
-        default=0.2,
+        default=.2,
         min=0,
-        max=0.5
+        max=.5
+    )
+    bpy.types.Scene.lamp_distance = bpy.props.FloatProperty(
+        name="Lamp distance",
+        description="Distance between consecutive road lamps",
+        default=1,
+        min=.5,
+        max=10
     )
     bpy.types.Scene.day = bpy.props.BoolProperty(
         name="Day",
@@ -279,6 +289,7 @@ def unregister():
     del bpy.types.Scene.center_radius
     del bpy.types.Scene.park_proba
     del bpy.types.Scene.elem_density
+    del bpy.types.Scene.lamp_distance
     del bpy.types.Scene.day
 
 

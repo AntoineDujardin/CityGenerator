@@ -118,8 +118,8 @@ class Block:
         
         offset = const.pavement_size / 3
         cut = lambda d: [offset] + \
-            self.cut_length(d - 2*offset, const.min_lamp_distance,
-                            const.max_lamp_distance)
+            self.cut_length(d - 2*offset, self.city.lamp_distance,
+                            2*self.city.lamp_distance)
         dist = 0
         for delta_dist in cut(self.x_size):
             dist += delta_dist
