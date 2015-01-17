@@ -2,12 +2,14 @@
 # if it's there, reload everything
 if "Block" in locals():
     import imp
+    imp.reload(car)
     imp.reload(const)
 else:
-    from city_generator import const
+    from city_generator import car, const
 
 
 import bpy
+import random
 
 class Road:
     """Class managing the roads."""
@@ -27,7 +29,10 @@ class Road:
         
         # draw itself
         self.draw()
-
+        
+        # add cars
+        self.add_cars()
+    
     
     def draw(self):
         """Draw the road."""
@@ -137,3 +142,18 @@ class Road:
         
         # update
         self.mesh.update()
+
+
+    def add_cars(self):
+        """Add cars to the road."""
+        
+        if self.orientation: # vertical
+            if self.y_size < 12:
+                return
+            car.Car(self.x_start + self.x_size/4, self.y_start + 1, 0,
+                    10, self.city)
+        else: # horizontal
+            if self.x_size < 12:
+                return
+            car.Car(self.x_start + 1, self.y_start + self.y_size/4, 3,
+                    10, self.city)
