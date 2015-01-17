@@ -70,8 +70,9 @@ class City:
         self.set_lightning(day)
         
         # configure animation
-        bpy.data.scenes["Scene"].frame_start = 1
+        bpy.data.scenes["Scene"].frame_start = 0
         bpy.data.scenes["Scene"].frame_end = 100
+        bpy.data.scenes["Scene"].frame_current = 0
         
     
     def add_static_camera(self):
@@ -112,6 +113,7 @@ class City:
         
         line.order_u = len(line.points)-1  
         line.use_endpoint_u = True
+        path_data.twist_mode = "Z_UP"
         
         # link camera to path
         bpy.ops.object.select_all(action="DESELECT")
@@ -345,7 +347,6 @@ class City:
             # fuse
             xs = xs_begin + xs_end
             ys = ys_begin + ys_end
-            ws = ws_begin + ws_end # 10s are for the crossroads
             ln = len(xs)
             zs = list((0,)) * ln
             cos = list((0,)) * ln
@@ -354,7 +355,7 @@ class City:
                     + const.camera_z_offset
             zs[0] = zs[1] # matches the path with camera orientation
             for i in range(ln):
-                cos[i] = (xs[i], ys[i], zs[i], ws[i])
+                cos[i] = (xs[i], ys[i], zs[i], 1)
             self.add_dynamic_camera(cos, 0)
 
 

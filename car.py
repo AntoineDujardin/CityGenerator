@@ -29,7 +29,7 @@ class Car:
         mesh.name = "".join(("C_car.000"))
         
         # frame
-        bpy.data.scenes["Scene"].frame_current = 1
+        bpy.data.scenes["Scene"].frame_current = 0
         bpy.ops.anim.keyframe_insert_menu(type='Location')
         N = 10
         x = x_start
