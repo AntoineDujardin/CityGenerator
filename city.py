@@ -167,6 +167,7 @@ class City:
             
         # lamp material
         bpy.data.materials["night_light"].emit = 1000 * (not day)
+        bpy.data.materials["night_light_2"].emit = 100 * (not day)
         
         # sun/moon
         self.add_sun_moon(day)
