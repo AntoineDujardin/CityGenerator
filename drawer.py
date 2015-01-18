@@ -100,7 +100,7 @@ def draw_relief_plane(x_start, x_size, y_start, y_size, name,
             "remove_on_cancel":False,
             "release_confirm":False
         })
-    bpy.ops.mesh.dissolve_limited()
+    bpy.ops.mesh.delete(type='FACE')
     bpy.ops.object.mode_set(mode='OBJECT')
     
     return object
