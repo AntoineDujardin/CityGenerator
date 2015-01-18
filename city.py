@@ -36,7 +36,7 @@ class City:
                  max_block_size, road_size, size_var,
                  center_radius, park_proba, elem_density, day,
                  relief_complexity, relief_amplitude, lamp_distance,
-                 scene):
+                 has_cars, scene):
         """Create the city"""
         
         # save the values
@@ -51,6 +51,7 @@ class City:
         self.elem_density = elem_density
         self.day = day
         self.lamp_distance = lamp_distance
+        self.has_cars = has_cars
         self.scene = scene
         
         # calculate the radius

@@ -66,6 +66,8 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'day')
         row = layout.row()
+        row.prop(scene, 'cars')
+        row = layout.row()
         row.operator('city.generate')
         row.operator('city.delete')
 
@@ -116,6 +118,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
                                   scene.relief_complexity,
                                   scene.relief_amplitude,
                                   scene.lamp_distance,
+                                  scene.cars,
                                   scene)
         
         return {'FINISHED'}
@@ -277,6 +280,11 @@ def register():
         description="Day or night",
         default=True
     )
+    bpy.types.Scene.cars = bpy.props.BoolProperty(
+        name="Cars",
+        description="Cars in the city",
+        default=True
+    )
 
 
 def unregister():
@@ -294,6 +302,7 @@ def unregister():
     del bpy.types.Scene.elem_density
     del bpy.types.Scene.lamp_distance
     del bpy.types.Scene.day
+    del bpy.types.Scene.cars
 
 
 if __name__ == "__main__":

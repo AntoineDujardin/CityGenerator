@@ -32,7 +32,8 @@ class Road:
         self.draw()
         
         # add cars
-        self.add_cars()
+        if self.city.has_cars:
+            self.add_cars()
     
     
     def draw(self):
