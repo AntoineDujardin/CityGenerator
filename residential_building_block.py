@@ -60,16 +60,16 @@ class ResidentialBuildingBlock(block.Block):
         for i in range(len_x):
             parcel.Parcel(parcels_x_starts[i], parcels_x_sizes[i],
                           parcels_y_starts[0], parcels_y_sizes[0],
-                          0, self.city, "residential_building")
+                          0, self, "residential_building")
         if len_y >= 2:
             for i in range(len_x):
                 parcel.Parcel(parcels_x_starts[i], parcels_x_sizes[i],
                               parcels_y_starts[-1], parcels_y_sizes[-1],
-                              2, self.city, "residential_building")
+                              2, self, "residential_building")
             for j in range(1, len_y-1):
                 parcel.Parcel(parcels_x_starts[0], parcels_x_sizes[0],
                               parcels_y_starts[j], parcels_y_sizes[j],
-                              3, self.city, "residential_building")
+                              3, self, "residential_building")
                 parcel.Parcel(parcels_x_starts[-1], parcels_x_sizes[-1],
                               parcels_y_starts[j], parcels_y_sizes[j],
-                              1, self.city, "residential_building")
+                              1, self, "residential_building")

@@ -92,6 +92,9 @@ class ParkBlock(block.Block):
         
         # add trees
         self.place_trees([v.co for v in park.data.vertices])
+        
+        # parent
+        park.parent = self.object
     
     
     def place_trees(self, coordinates_list):
@@ -128,6 +131,9 @@ class ParkBlock(block.Block):
         # link
         self.city.scene.objects.link(tree)
         self.city.scene.objects.link(leafs)
+        
+        # parent
+        tree.parent = self.object
         
 
     @classmethod

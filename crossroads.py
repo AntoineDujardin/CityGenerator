@@ -59,6 +59,7 @@ class Crossroads:
             self.city.ground.altitude_f(x, y))
         traffic_lights.rotation_euler = (0, 0, angle)
         self.city.scene.objects.link(traffic_lights)
+        traffic_lights.parent = self.object
 
     
     def draw(self):
@@ -162,3 +163,6 @@ class Crossroads:
         
         # update
         self.mesh.update()
+        
+        # parent
+        self.object.parent = self.city.roads_object

@@ -30,6 +30,12 @@ class Block:
         self.parcels_y_start = self.y_start + const.pavement_size
         self.parcels_y_size = self.y_size - 2*const.pavement_size
         
+        # create empty object
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        self.object = bpy.context.object
+        self.object.parent = self.city.blocks_object
+        self.object.name = "C_block.000"
+        
         # add details (lamps)
         self.add_details()
         
@@ -78,6 +84,9 @@ class Block:
         # update
         mesh.update()
         
+        # parent
+        object.parent = self.object
+        
         
     def draw_grass(self):
         """Draw the block grass."""
@@ -98,6 +107,9 @@ class Block:
         
         # update
         mesh.update()
+        
+        # parent
+        object.parent = self.object
     
     
     def cut_length(self, length, min_l, max_l):
@@ -145,3 +157,4 @@ class Block:
         lamp.location = (x, y,
             self.city.ground.altitude_f(x, y))
         self.city.scene.objects.link(lamp)
+        lamp.parent = self.object

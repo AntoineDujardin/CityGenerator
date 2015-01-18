@@ -3,10 +3,13 @@ import bpy
 class Car:
     """Class managing the cars."""
     
-    def __init__(self, x_start, y_start, orientation, distance, city):
+    def __init__(self, x_start, y_start, orientation, distance, road):
         """Create a car starting in x_start, y_start, running to the
         given orientation (0=S->N, 1=E->W, 2=N-S, 3=W->E) the given
         distance during the frame time."""
+        
+        # recover city
+        city = road.city
         
         # leave EDIT mode if needed
         if bpy.context.object:
@@ -54,3 +57,6 @@ class Car:
                     value=(0, y-old_y, z-old_z)
                 )
             bpy.ops.anim.keyframe_insert_menu(type='Location')
+            
+        # parent
+        object.parent = road.object

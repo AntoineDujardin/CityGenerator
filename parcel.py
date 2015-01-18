@@ -16,7 +16,7 @@ class Parcel:
     """Class managing the parcels."""
     
     def __init__(self, x_start, x_size, y_start, y_size, orientation,
-                 city, building_type):
+                 block, building_type):
         """Create a new parcel and subdivide it.
         The orientation represent the orientation of the facade.
         S=0, E=1, N=2, W=3.
@@ -32,10 +32,11 @@ class Parcel:
         self.y_center = y_start + y_size/2
         self.y_size = y_size
         self.building_type = building_type
-        self.city = city
+        self.block = block
+        self.city = block.city
         
         # add building
-        self.add_building(orientation, building_type, city.scene)
+        self.add_building(orientation, building_type, self.city.scene)
     
     
     def add_building(self, orientation, building_type, scene):
@@ -98,6 +99,9 @@ class Parcel:
             random.gauss(1, self.city.size_var)
         )
         self.city.scene.objects.link(building)
+        
+        # parent
+        building.parent = self.block.object
 
 
     @classmethod

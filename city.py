@@ -56,6 +56,26 @@ class City:
         # calculate the radius
         self.radius = math.hypot(self.x_size, self.y_size)/2
         
+        # center cursor
+        bpy.ops.view3d.snap_cursor_to_center()
+        
+        # create empty object for city
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        self.object = bpy.context.object
+        self.object.name = "C_City"
+        
+        # create empty object for roads
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        self.roads_object = bpy.context.object
+        self.roads_object.parent = self.object
+        self.roads_object.name = "C_roads"
+        
+        # create empty object for blocks
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        self.blocks_object = bpy.context.object
+        self.blocks_object.parent = self.object
+        self.blocks_object.name = "C_blocks"
+        
         # create the ground
         self.ground = ground.Ground(city_x_size, city_y_size,
                                     relief_complexity,

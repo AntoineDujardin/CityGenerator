@@ -45,13 +45,13 @@ class JointHouseBlock(block.Block):
         # S-W corner
         parcel.Parcel(self.parcels_x_start, corner_building_sizes[0],
                       self.parcels_y_start, corner_building_sizes[0],
-                      0, self.city, "joint_house_corner")
+                      0, self, "joint_house_corner")
         # S-E corner
         parcel.Parcel(self.parcels_x_start + self.parcels_x_size \
                         - corner_building_sizes[1],
                       corner_building_sizes[1],
                       self.parcels_y_start,
-                      corner_building_sizes[1], 1, self.city,
+                      corner_building_sizes[1], 1, self,
                       "joint_house_corner")
         # N-E corner
         parcel.Parcel(self.parcels_x_start + self.parcels_x_size \
@@ -59,14 +59,14 @@ class JointHouseBlock(block.Block):
                       corner_building_sizes[2],
                       self.parcels_y_start + self.parcels_y_size \
                       - corner_building_sizes[2],
-                      corner_building_sizes[2], 2, self.city,
+                      corner_building_sizes[2], 2, self,
                       "joint_house_corner")
         # N-W corner
         parcel.Parcel(self.parcels_x_start,
                       corner_building_sizes[3],
                       self.parcels_y_start + self.parcels_y_size \
                         - corner_building_sizes[3],
-                      corner_building_sizes[3], 3, self.city,
+                      corner_building_sizes[3], 3, self,
                       "joint_house_corner")
         
         # create the other buildings
@@ -93,7 +93,7 @@ class JointHouseBlock(block.Block):
             parcel.Parcel(parcels_side_x_starts[i],
                           parcels_side_x_sizes[i],
                           self.parcels_y_start,
-                          parcel_y_size, 0, self.city,
+                          parcel_y_size, 0, self,
                           "joint_house_side")
         # E face
         parcels_side_y_sizes = self.cut_length(
@@ -119,7 +119,7 @@ class JointHouseBlock(block.Block):
                               - parcel_x_size,
                           parcel_x_size,
                           parcels_side_y_starts[i],
-                          parcels_side_y_sizes[i], 1, self.city,
+                          parcels_side_y_sizes[i], 1, self,
                           "joint_house_side")
         # N face
         parcels_side_x_sizes = self.cut_length(
@@ -145,7 +145,7 @@ class JointHouseBlock(block.Block):
                           parcels_side_x_sizes[i],
                           self.parcels_y_start + self.parcels_y_size \
                               - parcel_y_size,
-                          parcel_y_size, 2, self.city,
+                          parcel_y_size, 2, self,
                           "joint_house_side")
         # W face
         parcels_side_y_sizes = self.cut_length(
@@ -170,5 +170,5 @@ class JointHouseBlock(block.Block):
             parcel.Parcel(self.parcels_x_start,
                           parcel_x_size,
                           parcels_side_y_starts[i],
-                          parcels_side_y_sizes[i], 3, self.city,
+                          parcels_side_y_sizes[i], 3, self,
                           "joint_house_side")

@@ -1,6 +1,6 @@
 # To support reload properly, try to access a package var, 
 # if it's there, reload everything
-if "Block" in locals():
+if "Road" in locals():
     import imp
     imp.reload(car)
     imp.reload(const)
@@ -142,6 +142,9 @@ class Road:
         
         # update
         self.mesh.update()
+        
+        # parent
+        self.object.parent = self.city.roads_object
 
 
     def add_cars(self):
@@ -151,9 +154,9 @@ class Road:
             if self.y_size < 12:
                 return
             car.Car(self.x_start + self.x_size/4, self.y_start + 1, 0,
-                    10, self.city)
+                    10, self)
         else: # horizontal
             if self.x_size < 12:
                 return
             car.Car(self.x_start + 1, self.y_start + self.y_size/4, 3,
-                    10, self.city)
+                    10, self)
