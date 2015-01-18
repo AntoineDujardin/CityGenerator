@@ -45,6 +45,11 @@ def draw_relief_plane(x_start, x_size, y_start, y_size, name,
     bpy.ops.object.transform_apply(location=True)
     
     # subdivide it
+    # note: edges indexing on primitive plane depends on Blender version
+    if bpy.app.version < (2, 70):
+        (ix1, ix2, iy1, iy2) = (0, 1, 2, 3)
+    else:
+        (ix1, ix2, iy1, iy2) = (1, 3, 0, 2)
     if (x_size >= 2 * y_size or y_size >= 2 * x_size):
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action = 'DESELECT')
@@ -54,13 +59,13 @@ def draw_relief_plane(x_start, x_size, y_start, y_size, name,
         for vert in mesh.vertices:
             vert.select = True
         if x_size > y_size:
-            mesh.edges[0].select = True
-            mesh.edges[1].select = True
+            mesh.edges[ix1].select = True
+            mesh.edges[ix2].select = True
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.subdivide(number_cuts=int(x_size / y_size))
         else:
-            mesh.edges[2].select = True
-            mesh.edges[3].select = True
+            mesh.edges[iy1].select = True
+            mesh.edges[iy2].select = True
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.subdivide(number_cuts=int(y_size / x_size))
     bpy.ops.object.mode_set(mode='EDIT')

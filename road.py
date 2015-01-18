@@ -4,8 +4,9 @@ if "Road" in locals():
     import imp
     imp.reload(car)
     imp.reload(const)
+    imp.reload(drawer)
 else:
-    from city_generator import car, const
+    from city_generator import car, const, drawer
 
 
 import bpy
@@ -37,89 +38,11 @@ class Road:
     def draw(self):
         """Draw the road."""
         
-        # leave EDIT mode if needed
-        if bpy.context.object:
-            bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # create a plane
-        bpy.ops.mesh.primitive_plane_add(radius=0.5, location=(0, 0, 0))
-        
-        # recover infos
-        self.scene = bpy.context.scene
-        self.object = bpy.context.object
+        # draw the plane
+        self.object = drawer.draw_relief_plane(
+            self.x_start, self.x_size, self.y_start, self.y_size,
+            "Road", self.city.ground.altitude_f)
         self.mesh = self.object.data
-        
-        # rename
-        self.object.name = "C_Road.000"
-        self.mesh.name = "C_Road.000"
-        
-        # scale it
-        self.object.scale[0] = self.x_size
-        self.object.scale[1] = self.y_size
-        bpy.ops.object.transform_apply(scale=True)
-        
-        # locate it
-        self.object.location[0] = self.x_start + self.x_size / 2
-        self.object.location[1] = self.y_start + self.y_size / 2
-        bpy.ops.object.transform_apply(location=True)
-        
-        # subdivide it
-        if (self.x_size >= 2 * self.y_size
-            or self.y_size >= 2 * self.x_size):
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.mesh.select_all(action = 'DESELECT')
-            bpy.context.tool_settings.mesh_select_mode = [False, True,
-                                                          False]
-            bpy.ops.object.mode_set(mode='OBJECT')
-            for vert in self.mesh.vertices:
-                vert.select = True
-            if self.x_size > self.y_size:
-                self.mesh.edges[0].select = True
-                self.mesh.edges[1].select = True
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.subdivide(number_cuts=int(self.x_size
-                                                       / self.y_size))
-            else:
-                self.mesh.edges[2].select = True
-                self.mesh.edges[3].select = True
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.subdivide(number_cuts=int(self.y_size
-                                                       / self.x_size))
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
-        bpy.ops.mesh.subdivide(number_cuts=int(min(self.x_size,
-                                                   self.y_size)))
-        bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # change altitude
-        altitude_f = self.city.ground.altitude_f
-        for vertex in self.mesh.vertices:
-            vertex.co.z = altitude_f(vertex.co.x, vertex.co.y)
-
-        # extrude
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
-        bpy.ops.mesh.extrude_region_move( \
-            MESH_OT_extrude_region={"mirror":False},
-            TRANSFORM_OT_translate={
-                "value":(0, 0, -const.planes_thickness),
-                "constraint_axis":(False, False, True),
-                "constraint_orientation":'NORMAL',
-                "mirror":False,
-                "proportional":'DISABLED',
-                "proportional_edit_falloff":'SMOOTH',
-                "proportional_size":1,
-                "snap":False,
-                "snap_target":'CLOSEST',
-                "snap_point":(0, 0, 0),
-                "snap_align":False,
-                "snap_normal":(0, 0, 0),
-                "texture_space":False,
-                "remove_on_cancel":False,
-                "release_confirm":False
-            })
-        bpy.ops.mesh.dissolve_limited()
-        bpy.ops.object.mode_set(mode='OBJECT')
 
         # add the material
         self.material = bpy.data.materials.new("C_Road.000")
