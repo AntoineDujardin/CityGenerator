@@ -1,4 +1,13 @@
+if "Car" in locals():
+    import imp
+    imp.reload(const)
+else:
+    from city_generator import const
+
+
 import bpy
+import random
+from math import pi
 
 class Car:
     """Class managing the cars."""
@@ -11,35 +20,42 @@ class Car:
         # recover city
         city = road.city
         
-        # leave EDIT mode if needed
-        if bpy.context.object:
-            bpy.ops.object.mode_set(mode='OBJECT')
+        # back to object mode
+        bpy.ops.object.mode_set(mode='OBJECT')
         
-        # create a plane
+        # choose car model
+        car_model = random.choice(Car.cars)
+        
+        # create the car
         alt = city.ground.altitude_f
-        bpy.ops.mesh.primitive_cube_add(
-            radius=.1, 
-            location=(x_start, y_start, alt(x_start, y_start) + .1)
-        )
+        car = car_model.copy()
+        car.name = "C_car.000"
+        car.location = (x_start, y_start,
+                        alt(x_start, y_start) +
+                        const.pavement_thickness)
+        car.rotation_euler = (0, 0, (orientation-2)*pi/2)
+        
+        # link
+        bpy.context.scene.objects.link(car)
         
         # recover infos
         scene = bpy.context.scene
-        object = bpy.context.object
-        mesh = object.data
+        mesh = car.data
         
-        # rename
-        object.name = "".join(("C_car.000"))
-        mesh.name = "".join(("C_car.000"))
+        # select
+        bpy.ops.object.select_all(action="DESELECT")
+        car.select = True
+        bpy.context.scene.objects.active = car
         
         # frame
-        bpy.data.scenes["Scene"].frame_current = 0
+        bpy.context.scene.frame_current = 0
         bpy.ops.anim.keyframe_insert_menu(type='Location')
         N = 10
         x = x_start
         y = y_start
         z = alt(x, y)
         for i in range(1, N+1):
-            bpy.data.scenes["Scene"].frame_current = round(100 * i / N)
+            bpy.context.scene.frame_current = round(100 * i / N)
             if orientation % 2:
                 old_x = x
                 x += (orientation-2) * distance / N
@@ -59,4 +75,13 @@ class Car:
             bpy.ops.anim.keyframe_insert_menu(type='Location')
             
         # parent
-        object.parent = road.object
+        car.parent = road.object
+
+
+    @classmethod
+    def load_cars(self):
+        Car.cars = list()
+        
+        for key, object in bpy.data.objects.items():
+            if key.startswith("car"):
+                Car.cars.append(object)

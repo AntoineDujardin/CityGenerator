@@ -8,12 +8,14 @@ bl_info = {
 # if it's there, reload everything
 if "bpy" in locals():
     import imp
+    imp.reload(car)
     imp.reload(city)
     imp.reload(const)
     imp.reload(parcel)
     imp.reload(park_block)
     imp.reload(resources)
 else:
+    from city_generator import car
     from city_generator import city
     from city_generator import const
     from city_generator import parcel
@@ -98,6 +100,7 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         resources.load_all()
         parcel.Parcel.load_buildings()
         park_block.ParkBlock.load_parks()
+        car.Car.load_cars()
         
         # Create the city
         city_instance = city.City(scene.city_x_size,
@@ -183,9 +186,9 @@ def register():
     bpy.types.Scene.relief_amplitude = bpy.props.FloatProperty(
         name="Relief_amplitude",
         description="Approximation of the maximum amplitude",
-        default=3,
+        default=2,
         min=0,
-        max=5,
+        max=3,
         precision=1,
         step=10
     )

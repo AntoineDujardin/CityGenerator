@@ -52,7 +52,7 @@ def draw_relief_plane(x_start, x_size, y_start, y_size, name,
         (ix1, ix2, iy1, iy2) = (1, 3, 0, 2)
     if (x_size >= 2 * y_size or y_size >= 2 * x_size):
         bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action = 'DESELECT')
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.context.tool_settings.mesh_select_mode = [False, True,
                                                       False]
         bpy.ops.object.mode_set(mode='OBJECT')

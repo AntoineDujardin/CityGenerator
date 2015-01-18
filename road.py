@@ -73,13 +73,28 @@ class Road:
     def add_cars(self):
         """Add cars to the road."""
         
+        min_dist = 10
         if self.orientation: # vertical
-            if self.y_size < 12:
+            if self.y_size < min_dist + 2:
                 return
-            car.Car(self.x_start + self.x_size/4, self.y_start + 1, 0,
-                    10, self)
+            dist = random.uniform(min_dist,
+                                  min(self.y_size - 2, 3*min_dist))
+            car.Car(self.x_start + 3*self.x_size/4, self.y_start + 1, 0,
+                    dist, self)
+            dist = random.uniform(min_dist,
+                                  min(self.y_size - 2, 3*min_dist))
+            car.Car(self.x_start + self.x_size/4,
+                    self.y_start + self.y_size - 1, 2,
+                    dist, self)
         else: # horizontal
-            if self.x_size < 12:
+            if self.x_size < min_dist + 2:
                 return
+            dist = random.uniform(min_dist,
+                                  min(self.x_size - 2, 3*min_dist))
             car.Car(self.x_start + 1, self.y_start + self.y_size/4, 3,
-                    10, self)
+                    dist, self)
+            dist = random.uniform(min_dist,
+                                  min(self.x_size - 2, 3*min_dist))
+            car.Car(self.x_start + self.x_size - 1,
+                    self.y_start + 3*self.y_size/4, 1,
+                    dist, self)
