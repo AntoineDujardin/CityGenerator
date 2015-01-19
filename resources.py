@@ -5,12 +5,6 @@ def load_all():
     """Append all elements from the addon blender file with the
     sources."""
     
-    # ensure the data is not already loaded
-    if load_all.called == True:
-        return
-    
-    load_all.called = True
-    
     s = os.sep
     dirname = os.path.dirname(__file__)
     path = s.join((dirname, "resources/resources.blend"))

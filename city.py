@@ -359,14 +359,14 @@ class City:
             xs_begin = [x_start+x_cut+x_road_size/2] * len(ys_begin)
             ws_begin = [1] * (len(ys_begin)-1) + [10]
             
-            # turn right
+            # go east from the main crossroad
             xs_end = list(frange(x_start+x_cut+x_road_size,
                                  x_start+x_size,
                                  min(2, (x_size-x_cut-x_road_size)/2)))
             ys_end = [y_start+y_cut+y_road_size/2] * len(xs_end)
             ws_end = [10] + [1] * (len(xs_end)-1)
             
-            # fuse
+            # concatenate ways.
             xs = xs_begin + xs_end
             ys = ys_begin + ys_end
             ln = len(xs)

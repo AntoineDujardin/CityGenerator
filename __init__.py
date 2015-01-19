@@ -26,6 +26,7 @@ else:
 import bpy
 
 # shared
+loaded = False
 city_instance = None
 
 class CityGeneratorPanel(bpy.types.Panel):
@@ -68,8 +69,42 @@ class CityGeneratorPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, 'cars')
         row = layout.row()
+        row.operator('city.load')
         row.operator('city.generate')
         row.operator('city.delete')
+
+
+class OBJECT_OT_LoadCity(bpy.types.Operator):
+    bl_idname = "city.load"
+    bl_label = "Load"
+    bl_description = "Erase everything and load the resources"
+ 
+    def execute(self, context):
+        global loaded
+        
+        # leave EDIT mode if needed
+        if bpy.context.object:
+            bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # clear
+        for object in context.scene.objects.items():
+            scene.objects.unlink(object)
+        for object in bpy.data.objects:
+            del object
+        for mesh in bpy.data.meshes:
+            del mesh
+        for material in bpy.data.materials:
+            del material
+        for texture in bpy.data.textures:
+            del texture
+        
+        # load
+        resources.load_all()
+        
+        # mark
+        loaded = True
+        
+        return {'FINISHED'}
 
 
 class OBJECT_OT_GenerateCity(bpy.types.Operator):
@@ -99,7 +134,8 @@ class OBJECT_OT_GenerateCity(bpy.types.Operator):
         bpy.ops.city.delete()
         
         # Load the resources
-        resources.load_all()
+        if not loaded:
+            bpy.ops.city.load()
         parcel.Parcel.load_buildings()
         park_block.ParkBlock.load_parks()
         car.Car.load_cars()
